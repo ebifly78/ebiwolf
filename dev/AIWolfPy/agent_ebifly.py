@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 from __future__ import print_function, division 
 
-# this is main script
-# simple version
 
 import aiwolfpy
 import aiwolfpy.contentbuilder as cb
 
+import aiwolfpy.ebifly as ebi
 myname = 'ebifly'
 
 class SampleAgent(object):
