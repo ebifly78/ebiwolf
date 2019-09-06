@@ -8,7 +8,7 @@ import aiwolfpy.contentbuilder as cb
 import aiwolfpy.ebifly as ebi
 myname = 'ebifly'
 
-class SampleAgent(object):
+class MyAgent(object):
     
     def __init__(self, agent_name):
         # myname
@@ -56,7 +56,7 @@ class SampleAgent(object):
     
 
 
-agent = SampleAgent(myname)
+agent = MyAgent(myname)
     
 
 
