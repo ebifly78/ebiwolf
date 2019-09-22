@@ -54,8 +54,8 @@ class Predictor_15(object):
         
         # initialize watashi_ningen
         self.watshi_ningen = np.ones(5460)
-        #xv = self.case15.get_case5460_df()["agent_"+str(self.base_info['agentIdx'])].values
-        xv = self.case15.get_case5460_df()["agent_"+str(self.base_info['agent'])].values
+        xv = self.case15.get_case5460_df()["agent_"+str(self.base_info['agentIdx'])].values
+        # xv = self.case15.get_case5460_df()["agent_"+str(self.base_info['agent'])].values
         self.watshi_ningen[xv != 0] = 0.0
         
         # initialize x_3d, x_2d
