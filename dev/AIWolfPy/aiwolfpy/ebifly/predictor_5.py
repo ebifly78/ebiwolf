@@ -9,7 +9,7 @@ class Predictor_5(object):
         
         # num of param
         self.n_para_3d = 3
-        self.n_para_2d = 8
+        self.n_para_2d = 6
         
         # param_linear
         self.para_3d = np.zeros((4, 4, self.n_para_3d))
@@ -50,8 +50,30 @@ class Predictor_5(object):
         """
 
         # my param
-
-
+        param_data = [-0.48876856, 1.32325966,-2.39670778,-0.14712448,-2.7766485 , 2.32391299,
+                        -0.5622551 , 0.86674804,-2.84946199,-0.49219547, 1.33906383,-2.39909599,
+                        1.45915514, 0.41476269,-0.03100278, 0.        ,-0.43673512, 0.        ,
+                        1.18398797, 0.25466381,-1.22750884, 1.45444443, 0.40961036,-0.02897342,
+                        -0.07213567,-0.53800324, 0.11544423,-0.01796048,-0.66469015,-1.21257191,
+                        0.        ,-0.7491663 , 0.        ,-0.07147983,-0.53479981, 0.11327178,
+                        -0.47918485, 1.311403  ,-2.47759178,-0.13661977,-2.29967171, 2.24917958,
+                        -0.55252677, 0.82057636,-2.43349497, 0.        , 0.38452864, 0.        ,
+                        -0.48393659, 0.29507184,-1.48710682, 0.27663616,-2.48089234,-0.38545322,
+                        -0.4129754 ,-3.72706974,-0.75448952,-0.62995894,-2.16836333,-1.13148981,
+                        -0.1823445 ,-0.03449806, 3.41947274,-0.79649188, 4.39490806, 3.36059844,
+                        -0.47933777, 0.29119958,-1.43782762, 0.25636475,-1.99020246,-0.3487788 ]
+        
+        num = 0
+        for i in range(4):
+            for j in range(4):
+                for k in range(3):
+                    self.para_3d[i, j, k] = param_data[num]
+                    num += 1
+        
+        for i in range(4):
+            for j in range(6):
+                self.para_2d[i, j] = param_data[num]
+                num += 1
 
         self.x_3d = np.zeros((5, 5, self.n_para_3d), dtype='float32')
         self.x_2d = np.zeros((5, self.n_para_2d), dtype='float32')
@@ -68,10 +90,10 @@ class Predictor_5(object):
         self.watshi_xxx = np.ones((60, 4))
 
         # use for Machine Learning
-        xv = self.case5.get_case60_df()["agent_"+str(self.base_info['agent'])].values
+        #xv = self.case5.get_case60_df()["agent_"+str(self.base_info['agent'])].values
 
         # use for Python agent
-        # xv = self.case5.get_case60_df()["agent_"+str(self.base_info['agentIdx'])].values
+        xv = self.case5.get_case60_df()["agent_"+str(self.base_info['agentIdx'])].values
 
         self.watshi_xxx[xv != 0, 0] = 0.0
         self.watshi_xxx[xv != 1, 1] = 0.0
@@ -93,11 +115,9 @@ class Predictor_5(object):
         [i, 0] : agent i is executed
         [i, 1] : agent i is attacked
         [i, 2] : agent i comingout himself/herself SEER
-        [i, 3] : agent i comingout himself/herself MEDIUM
-        [i, 4] : agent i comingout himself/herself BODYGUARD
-        [i, 5] : agent i comingout himself/herself VILLAGER
-        [i, 6] : agent i comingout himself/herself POSSESSED
-        [i, 7] : agent i comingout himself/herself WEREWOLF
+        [i, 3] : agent i comingout himself/herself VILLAGER
+        [i, 4] : agent i comingout himself/herself POSSESSED
+        [i, 5] : agent i comingout himself/herself WEREWOLF
         """
         
     def update(self, gamedf):
@@ -126,23 +146,17 @@ class Predictor_5(object):
                     # self
                     if int(content[1][6:8]) == gamedf.agent[i]:
                         if content[2] == 'SEER':
-                            self.x_2d[gamedf.agent[i] - 1, 2:8] = 0
+                            self.x_2d[gamedf.agent[i] - 1, 2:6] = 0
                             self.x_2d[gamedf.agent[i] - 1, 2] = 1
-                        elif content[2] == 'MEDIUM':
-                            self.x_2d[gamedf.agent[i] - 1, 2:8] = 0
-                            self.x_2d[gamedf.agent[i] - 1, 3] = 1
-                        elif content[2] == 'BODYGUARD':
-                            self.x_2d[gamedf.agent[i] - 1, 2:8] = 0
-                            self.x_2d[gamedf.agent[i] - 1, 4] = 1
                         elif content[2] == 'VILLAGER':
-                            self.x_2d[gamedf.agent[i] - 1, 2:8] = 0
-                            self.x_2d[gamedf.agent[i] - 1, 5] = 1
+                            self.x_2d[gamedf.agent[i] - 1, 2:6] = 0
+                            self.x_2d[gamedf.agent[i] - 1, 3] = 1
                         elif content[2] == 'POSSESSED':
-                            self.x_2d[gamedf.agent[i] - 1, 2:8] = 0
-                            self.x_2d[gamedf.agent[i] - 1, 6] = 1
+                            self.x_2d[gamedf.agent[i] - 1, 2:6] = 0
+                            self.x_2d[gamedf.agent[i] - 1, 4] = 1
                         elif content[2] == 'WEREWOLF':
-                            self.x_2d[gamedf.agent[i] - 1, 2:8] = 0
-                            self.x_2d[gamedf.agent[i] - 1, 7] = 1
+                            self.x_2d[gamedf.agent[i] - 1, 2:6] = 0
+                            self.x_2d[gamedf.agent[i] - 1, 5] = 1
                 # divined
                 elif content[0] == 'DIVINED':
                     # regard comingout
@@ -161,7 +175,7 @@ class Predictor_5(object):
         # update 60 dataframe
         self.df_pred = self.case5.apply_tensor_df(self.x_3d, self.x_2d, 
                                                    names_3d=["VOTE", "DIV_HM", "DIV_WW"], 
-                                                   names_2d=['executed', 'attacked', 'CO_SEER', 'CO_MEDIUM', 'CO_BODYGUARD', 'CO_VILLAGER', 'CO_POSSESSED', 'CO_WEREWOLF'])
+                                                   names_2d=['executed', 'attacked', 'CO_SEER', 'CO_VILLAGER', 'CO_POSSESSED', 'CO_WEREWOLF'])
         
     
     def update_pred(self):

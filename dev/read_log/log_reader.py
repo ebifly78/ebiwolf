@@ -19,6 +19,7 @@ class agent:
         self.win     = [0, 0, 0, 0, 0, 0, 0, 0]
     
     def register(self):
+        self.win[ALL_ROLE] += 1
         if self.role == 'WEREWOLF':
             self.win[WEREWOLF] += 1
         else:
@@ -29,7 +30,8 @@ agent = agent()
 agent.name = 'ebifly'
 
 i = 0
-file_list = glob.glob('../log/*.log')
+# file_list = glob.glob('../log/test5/*.log')
+file_list = glob.glob('../../Server/AIWolf-ver0.5.6/log/test11/*.log')
 
 for files in file_list:
     file = open(file_list[i], 'r')
@@ -50,7 +52,7 @@ for files in file_list:
         # get myagent win or lose
         if row[1] == 'result':
             if row[4] == agent.role:
-                agent.register
+                agent.register()
 
     file.close
     i += 1
@@ -72,3 +74,4 @@ def show_win_rate():
         print('win_rate @ ALL      = {}'.format(agent.win[ALL_ROLE] / agent.matches[ALL_ROLE]))
 
 show_win_rate()
+print(agent.matches[ALL_ROLE])
