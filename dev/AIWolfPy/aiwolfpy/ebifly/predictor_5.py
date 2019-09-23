@@ -13,42 +13,8 @@ class Predictor_5(object):
         
         # param_linear
         self.para_3d = np.zeros((4, 4, self.n_para_3d))
-        """
-        l09 = - math.log10(0.9)
-        l05 = - math.log10(0.5)
-        # werewolf might not vote possessed
-        self.para_3d[1, 2, 0] = l05
-        # possessed might not vote werewolf
-        self.para_3d[2, 1, 0] = l09
-        # possessed might not divine werewolf as werewolf
-        self.para_3d[2, 1, 2] = l09
-        # werewolf might not divine possessed as werewolf
-        self.para_3d[1, 2, 2] = l05
-        # werewolf would not divine werewolf as werewolf
-        self.para_3d[1, 1, 2] = 1.0
-        # Seer should not tell a lie
-        self.para_3d[3, 0, 2] = 2.0
-        self.para_3d[3, 2, 2] = 2.0
-        self.para_3d[3, 1, 1] = 2.0
-        """
-
         self.para_2d = np.zeros((4, self.n_para_2d))
-        """
-        # Seer should comingout correctly
-        self.para_2d[3, 2] = -2.0
-        self.para_2d[3, 5] = 2.0
-        self.para_2d[3, 6] = 2.0
-        # Possessed should comingout
-        self.para_2d[2, 2] = -2.0
-        self.para_2d[2, 6] = -1.0
-        # villagers must not comingout
-        self.para_2d[0, 2] = -2.0
-        self.para_2d[0, 6] = -1.0
-        # werewolf is alive
-        self.para_2d[1, 0] = 100.0
-        self.para_2d[1, 1] = 100.0
-        """
-
+        
         # my param
         param_data = [-0.48876856, 1.32325966,-2.39670778,-0.14712448,-2.7766485 , 2.32391299,
                         -0.5622551 , 0.86674804,-2.84946199,-0.49219547, 1.33906383,-2.39909599,
