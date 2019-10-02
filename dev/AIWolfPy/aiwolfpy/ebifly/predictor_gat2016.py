@@ -14,6 +14,8 @@ class Predictor_15(object):
         
         # param_linear
         self.para_3d = np.zeros((3, 3, self.n_para_3d))
+        self.para_2d = np.zeros((3, self.n_para_2d))
+        """
         l09 = - math.log10(0.9)
         l05 = - math.log10(0.5)
         # werewolf might not vote possessed
@@ -39,6 +41,29 @@ class Predictor_15(object):
         # village Bodyguard should not tell a lie
         # self.para_3d[0, 1, 5] = 2.0
         self.para_2d = np.zeros((3, self.n_para_2d))
+        """
+        param_data = [-0.00579786, 0.45319788,-0.07442558, 0.18834123,-0.22989226, 0.00903539,
+  -2.7067457 , 3.02185037,-1.22157364, 0.31251227, 0.00215233, 3.64404108,
+  -0.91679833,-0.20847263,-0.18742707,-0.1069208 ,-0.25177138,-2.73456764,
+  -0.40215601,-0.00007657, 0.0886624 ,-0.21967366,-2.13211529,-0.00473238,
+  -0.00009996, 0.03481602,-1.52426828,-5.09649661,-0.00008645,-0.00001677,
+   0.23880259, 0.10542505,-1.78890742,-0.11422235,-0.00003511,-0.11876763,
+  -0.32568242,-1.40965171,-0.0008131 ,-0.00004245, 0.        , 2.34675029,
+   0.        , 0.        , 0.        ,-0.03457679, 0.15090941,-7.43873185,
+   0.08869527, 0.        ,-0.24148785,-2.1925034 , 3.60327236,-0.2934707 ,
+   0.        ,-0.58338013, 1.26267022, 2.3856171 ,-0.08519305, 0.        ]
+
+        num = 0
+        for i in range(3):
+            for j in range(3):
+                for k in range(5):
+                    self.para_3d[i, j, k] = param_data[num]
+                    num += 1
+        
+        for i in range(3):
+            for j in range(5):
+                self.para_2d[i, j] = param_data[num]
+                num += 1
         
         self.x_3d = np.zeros((15, 15, self.n_para_3d), dtype='float32')
         self.x_2d = np.zeros((15, self.n_para_2d), dtype='float32')
@@ -55,7 +80,7 @@ class Predictor_15(object):
         # initialize watashi_ningen
         self.watshi_ningen = np.ones(5460)
         xv = self.case15.get_case5460_df()["agent_"+str(self.base_info['agentIdx'])].values
-        # xv = self.case15.get_case5460_df()["agent_"+str(self.base_info['agent'])].values
+        #xv = self.case15.get_case5460_df()["agent_"+str(self.base_info['agent'])].values
         self.watshi_ningen[xv != 0] = 0.0
         
         # initialize x_3d, x_2d
@@ -153,7 +178,7 @@ class Predictor_15(object):
         # predict
         # Linear
         l_para = np.append(self.para_3d.reshape((3*3*self.n_para_3d, 1)), self.para_2d.reshape((3*self.n_para_2d, 1)))
-        self.df_pred["pred"] = np.matmul(self.df_pred, l_para.reshape(-1, 1))
+        self.df_pred["pred"] = np.matmul(self.df_pred.values, l_para.reshape(-1, 1))
         
     
         # If-then rules 1
