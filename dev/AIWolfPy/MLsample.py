@@ -70,17 +70,28 @@ x_1000 = np.zeros((60000, 72))
 y_1000 = np.zeros(60000)
 
 ind = 0
+file_ok = 0
+def_file_no = 115047
 for i in range(100):
-    log_path = "../log/gat2017log05/000/" + "{0:03d}".format(i) + ".log"
+    # log_path = "../log/gat2017log05/000/" + "{0:03d}".format(i) + ".log"
+    log_path = "../log/sample6/AIWolf20191002" + "{0:03d}".format(def_file_no+i) + ".log"
+    
     for d in range(3):
-        x, y = game_data_filter(aiwolfpy.read_log(log_path), day=d, phase='vote')
-        x_1000[(ind*60):((ind+1)*60), :] = x
-        y_1000[(ind*60):((ind+1)*60)] = y
-        ind += 1
-        x, y = game_data_filter(aiwolfpy.read_log(log_path), day=d+1, phase='daily_initialize')
-        x_1000[(ind*60):((ind+1)*60), :] = x
-        y_1000[(ind*60):((ind+1)*60)] = y
-        ind += 1
+        try:
+            x, y = game_data_filter(aiwolfpy.read_log(log_path), day=d, phase='vote')
+            x_1000[(ind*60):((ind+1)*60), :] = x
+            y_1000[(ind*60):((ind+1)*60)] = y
+            ind += 1
+            x, y = game_data_filter(aiwolfpy.read_log(log_path), day=d+1, phase='daily_initialize')
+            x_1000[(ind*60):((ind+1)*60), :] = x
+            y_1000[(ind*60):((ind+1)*60)] = y
+            ind += 1
+        except FileNotFoundError:
+            def_file_no += i + 1
+            i -= 1
+            print('detect')
+            break
+
 
 model = sklearn.linear_model.LogisticRegression()
 model.fit(x_1000, y_1000)

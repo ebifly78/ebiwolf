@@ -15,6 +15,7 @@ class agent:
     def __init__(self):
         self.name = ''
         self.role = ''
+        self.id   = 0
         self.matches = [0, 0, 0, 0, 0, 0, 0, 0]
         self.win     = [0, 0, 0, 0, 0, 0, 0, 0]
     
@@ -29,9 +30,13 @@ class agent:
 agent = agent()
 agent.name = 'ebifly'
 
+wolf_id = ''
+atari = [0,0]
+hazure = [0,0]
+
 i = 0
 # file_list = glob.glob('../log/test5/*.log')
-file_list = glob.glob('../../Server/AIWolf-ver0.5.6/log/test11/*.log')
+file_list = glob.glob('../../Server/AIWolf-ver0.5.6/log/sample6/*.log')
 
 for files in file_list:
     file = open(file_list[i], 'r')
@@ -43,6 +48,7 @@ for files in file_list:
         if row[0] == '0' and row[1] == 'status':
             if row[5] == agent.name:
                 agent.role = row[3]
+                agent.id = row[2]
                 agent.matches[ALL_ROLE] += 1
                 if agent.role == 'WEREWOLF':
                     agent.matches[WEREWOLF] += 1
@@ -53,6 +59,19 @@ for files in file_list:
         if row[1] == 'result':
             if row[4] == agent.role:
                 agent.register()
+
+        # get werewolf
+        if row[0] == '0' and row[1] == 'status':
+            if row[3] == 'WEREWOLF':
+                wolf_id = row[2]
+        
+        # check estimate
+        if row[1] == 'vote' and row[2] == agent.id:
+            if row[3] == wolf_id:
+                atari[int(row[0])-1] += 1
+            else:
+                hazure[int(row[0])-1] += 1
+
 
     file.close
     i += 1
@@ -75,3 +94,5 @@ def show_win_rate():
 
 show_win_rate()
 print(agent.matches[ALL_ROLE])
+print(atari[0]/(atari[0]+hazure[0]))
+print(atari[1]/(atari[1]+hazure[1]))

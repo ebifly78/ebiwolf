@@ -110,10 +110,12 @@ class PythonPlayer(object):
         if self.vote_declare != self.vote():
             self.vote_declare = self.vote()
             return cb.vote(self.vote_declare)
-            
+        
         # 4. skip
         if self.talk_turn <= 10:
             return cb.skip()
+        
+        
             
         return cb.over()
 
