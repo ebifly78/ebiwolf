@@ -2,6 +2,7 @@
 /TEX
 log
 /Server
-/debug
-/dev/AIWolfPy/jinro_natural
-/dev/AIWolfPy/RFestimator
+debug
+jinro_natural
+RFestimator
+read_log
