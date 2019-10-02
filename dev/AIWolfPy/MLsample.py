@@ -2,6 +2,7 @@ from __future__ import print_function, division
 
 import os 
 import sys
+import glob
 
 import numpy as np
 import pandas as pd
@@ -60,13 +61,14 @@ def game_data_filter(df, day, phase='daily_initialize', agent=0):
     
     return predictor.df_pred, y
 
-log_path = "../log/gat2017log05/000/000.log"
-
-x, y = game_data_filter(aiwolfpy.read_log(log_path), day=3, phase='vote')
-
 # build data for 100 games
 # takes several minutes
-match_num = 100
+match_num = 0
+filenum = 1
+file_list = glob.glob('../../Server/AIWolf-ver0.5.6/log/file'+'{}'.format(filenum)+'/*.log')
+for files in file_list:
+    match_num += 1
+
 days = 3
 x_1000 = np.zeros((60*2*days*match_num, 72))
 y_1000 = np.zeros(60*2*days*match_num)
@@ -75,7 +77,8 @@ ind = 0
 filecount = 0
 for i in range(999999):
     # log_path = "../log/gat2017log05/000/" + "{0:03d}".format(i) + ".log"
-    log_path = "../../Server/AIWolf-ver0.5.6/log/sample25/AIWolf20191002" + "{0:03d}".format(i) + ".log"
+    # log_path = '../../Server/AIWolf-ver0.5.6/log/file'+'{}'.format(filenum)+'/AIWolf20191002' + '{0:03d}'.format(i) + '.log'
+    log_path = file_list[filecount]
     
     for d in range(days):
         try:
@@ -100,4 +103,6 @@ model.fit(x_1000, y_1000)
 
 np.set_printoptions(suppress=True)
 
+print('file'+'{}'.format(filenum))
+print(str(filecount)+'files')
 print(np.array2string(model.coef_, separator=','))

@@ -56,10 +56,10 @@ class Predictor_5(object):
         self.watshi_xxx = np.ones((60, 4))
 
         # use for Machine Learning
-        #xv = self.case5.get_case60_df()["agent_"+str(self.base_info['agent'])].values
+        xv = self.case5.get_case60_df()["agent_"+str(self.base_info['agent'])].values
 
         # use for Python agent
-        xv = self.case5.get_case60_df()["agent_"+str(self.base_info['agentIdx'])].values
+        #xv = self.case5.get_case60_df()["agent_"+str(self.base_info['agentIdx'])].values
 
         self.watshi_xxx[xv != 0, 0] = 0.0
         self.watshi_xxx[xv != 1, 1] = 0.0

@@ -51,7 +51,7 @@ filecount = 0
 
 i = 0
 # file_list = glob.glob('../log/test5/*.log')
-filenum = 2
+filenum = 1
 file_list = glob.glob('../../Server/AIWolf-ver0.5.6/log/file'+'{}'.format(filenum)+'/*.log')
 
 for files in file_list:
