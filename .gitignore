@@ -8,3 +8,5 @@ little
 jinro_natural
 RFestimator
 read_log
+.ipynb_checkpoints
+*.pyc
