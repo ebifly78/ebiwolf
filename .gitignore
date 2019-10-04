@@ -10,4 +10,4 @@ RFestimator
 read_log
 .ipynb_checkpoints
 *.pyc
-.gitginore
+.gitignore
