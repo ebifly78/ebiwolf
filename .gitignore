@@ -1,7 +1,6 @@
 /private
 /TEX
-log
-/Server
+Server/AIWolf-ver0.5.6/*
 debug
 __pycache__
 little
@@ -10,3 +9,7 @@ RFestimator
 read_log
 .ipynb_checkpoints
 *.pyc
+activate.sh
+logs
+click.workflow
+!/Server/AIWolf-ver0.5.6/log/

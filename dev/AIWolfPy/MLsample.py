@@ -12,6 +12,8 @@ import math
 import aiwolfpy
 import aiwolfpy.ebifly
 
+from sklearn.svm import SVC
+
 predictor = aiwolfpy.ebifly.Predictor_5()
 
 def game_data_filter(df, day, phase='daily_initialize', agent=0):
@@ -64,7 +66,7 @@ def game_data_filter(df, day, phase='daily_initialize', agent=0):
 # build data for 100 games
 # takes several minutes
 match_num = 0
-filenum = 20
+filenum = 24
 file_list = glob.glob('../../Server/AIWolf-ver0.5.6/log/file'+'{}'.format(filenum)+'/*.log')
 for files in file_list:
     match_num += 1
@@ -98,7 +100,8 @@ for i in range(999999):
         break
 
 
-model = sklearn.linear_model.LogisticRegression()
+#model = sklearn.linear_model.LogisticRegression()
+model = SVC(kernel='linear', random_state=None)
 model.fit(x_1000, y_1000)
 
 np.set_printoptions(suppress=True)
