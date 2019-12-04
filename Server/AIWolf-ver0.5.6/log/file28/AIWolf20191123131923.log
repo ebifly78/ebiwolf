@@ -1,0 +1,6 @@
+0,status,1,WEREWOLF,ALIVE,SampleRoleAssignPlayer
+0,status,2,VILLAGER,ALIVE,SampleRoleAssignPlayer
+0,status,3,VILLAGER,ALIVE,SampleRoleAssignPlayer
+0,status,4,POSSESSED,ALIVE,SampleRoleAssignPlayer
+0,status,5,SEER,ALIVE,ebifly
+0,divine,5,1,WEREWOLF

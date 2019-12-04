@@ -191,6 +191,7 @@ class Predictor_5(object):
         [i, j, 6] : agent i estimate agent j VILLAGER
         [i, j, 7] : agent i estimate agent j POSSESSED
         [i, j, 8] : agent i estimate agent j WEREWOLF
+        # [i, j, 9] : agent i vote agent j (not in action, talk)
 
         X_2d
         [i, 0] : agent i is executed

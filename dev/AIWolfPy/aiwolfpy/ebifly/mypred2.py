@@ -6,9 +6,9 @@ import random
 
 
 class Talking():
-    def __init__(self, content):
-        self.subject = ''
-        self.target = ''
+    def __init__(self):
+        self.subject = '99'
+        self.target = '99'
         self.role = ''
         self.species = ''
         self.verb = ''
@@ -16,106 +16,199 @@ class Talking():
         self.talk_number = ''
         self.sentence = []
 
+    def print_text(self):
+        print(self.subject)
+        print(self.target)
+        print(self.role)
+        print(self.species)
+        print(self.verb)
+        print(self.operator)
+        print(self.talk_number)
+        print(self.sentence)
+
 
 class Predictor_5(object):
 
     def parse_agent(self, content):
-        return int((content.strip('Agent[0')).strip(']'))
+        if type(content) is str:
+            content = content.strip('Agent[0')
+            content = content.strip(']')
+        return int(content)
 
-    def commit(self, content):
+    def commit_verb(self, content):
+        # content.print_text()
+        if content.subject == 'ANY':
+            return
+        else:
+            content.subject = self.parse_agent(content.subject)
+        if content.subject == 'ANY':
+            return
+        else:
+            content.target = self.parse_agent(content.target)
+        # content.print_text()
         if content.verb == 'ESTIMATE':
-            if self.role == 'SEER':
-                pass
+            if content.role == 'SEER':
+                self.x_3d[content.subject - 1, content.target - 1, 5:9] = 0
+                self.x_3d[content.subject - 1, content.target - 1, 5] = 1
+            elif content.role == 'VILLAGER':
+                self.x_3d[content.subject - 1, content.target - 1, 5:9] = 0
+                self.x_3d[content.subject - 1, content.target - 1, 6] = 1
+            elif content.role == 'POSSESSED':
+                self.x_3d[content.subject - 1, content.target - 1, 5:9] = 0
+                self.x_3d[content.subject - 1, content.target - 1, 7] = 1
+            elif content.role == 'WEREWOLF':
+                self.x_3d[content.subject - 1, content.target - 1, 5:9] = 0
+                self.x_3d[content.subject - 1, content.target - 1, 8] = 1
+        elif content.verb == 'COMINGOUT':
+            if content.role == 'SEER':
+                self.x_2d[content.target - 1, 2:6] = 0
+                self.x_2d[content.target - 1, 2] = 1
+            elif content.role == 'VILLAGER':
+                self.x_2d[content.target - 1, 2:6] = 0
+                self.x_2d[content.target - 1, 3] = 1
+            elif content.role == 'POSSESSED':
+                self.x_2d[content.target - 1, 2:6] = 0
+                self.x_2d[content.target - 1, 4] = 1
+            elif content.role == 'WEREWOLF':
+                self.x_2d[content.target - 1, 2:6] = 0
+                self.x_2d[content.target - 1, 5] = 1
+        elif content.verb == 'DIVINATION':
+            pass
+        elif content.verb == 'VOTE':
+            # self.x_3d[content.subject - 1, content.target - 1, 9] = 1
+            pass
+        elif content.verb == 'ATTACK':
+            pass
+        elif content.verb == 'DIVINED':
+            self.x_2d[content.subject - 1, 2:6] = 0
+            self.x_2d[content.subject - 1, 2] = 1
+            if content.role == 'HUMAN':
+                self.x_3d[content.subject - 1, content.target - 1, 1] = 1
+                self.x_3d[content.subject - 1, content.target - 1, 2] = 0
+            elif content.role == 'WEREWOLF':
+                self.x_3d[content.subject - 1, content.target - 1, 1] = 0
+                self.x_3d[content.subject - 1, content.target - 1, 2] = 1
+        elif content.verb == 'VOTED':
+            pass
+        elif content.verb == 'ATTACKED':
+            pass
+        elif content.verb == 'AGREE':
+            self.x_3d[content.subject - 1, content.target - 1, 3] = 1
+        elif content.verb == 'DISAGREE':
+            self.x_3d[content.subject - 1, content.target - 1, 4] = 1
+        elif content.verb == 'Over':
+            pass
+        elif content.verb == 'Skip':
+            pass
 
-    def split_bracket(self, content, num):
+    def split_bracket(self, content, op_subject):
         list1 = []
         kakko = 0
-        for index, item in enumerate(content[index:]):
-            if item == '(' and kakko == 0:
+        start = 0
+        end = 0
+        memo = 0
+        memo2 = 0
+        for index, item in enumerate(content):
+            if item.count('(') > 0 and kakko == 0:
+                memo2 = item.count('(')
                 start = index
-            if item == ')' and kakko == 0:
-                end = index + 1
-            list1.append(self.talk_content(content[start:end]))
-
+                content[index] = item[item.count('('):]
             kakko += item.count('(')
+            memo = kakko
             kakko -= item.count(')')
+            if item.count(')') > 0 and kakko == 0:
+                end = index + 1
+                content[index] = item[:len(
+                    item) - item.count(')') + memo - memo2]
+            if index != 0 and kakko == 0:
+                list1.append(self.talk_content(content[start:end], op_subject))
+
         return list1
 
-    def talk_content(self, content):
-        text = Talking(content)
-
+    def talk_content(self, content, op_subject):
+        text = Talking()
         index = 0
         if 'Agent' in content[index] or 'ANY' in content[index]:
             text.subject = content[index]
             index += 1
         else:
-            text.subject = 'UNSPEC'
+            text.subject = op_subject
 
         text.verb = content[index]
-        index += 1
-        if content[index] == 'ESTIMATE':
-            text.target = parse_agent(content[index+1])
+        # text.target = self.#parse_agent(content[index+1])
+        if text.verb == 'ESTIMATE':
+            text.target = content[index+1]
             text.role = content[index+2]
-        elif content[index] == 'COMINGOUT':
-            text.target = parse_agent(content[index+1])
+            self.commit_verb(text)
+        elif text.verb == 'COMINGOUT':
+            text.target = content[index+1]
             text.role = content[index+2]
-        elif content[index] == 'DIVINATION':
-            text.target = parse_agent(content[index+1])
-        elif content[index] == 'VOTE':
-            text.target = parse_agent(content[index+1])
-        elif content[index] == 'ATTACK':
-            text.target = parse_agent(content[index+1])
-        elif content[index] == 'DIVINED':
-            text.target = parse_agent(content[index+1])
+            self.commit_verb(text)
+        elif text.verb == 'DIVINATION':
+            text.target = content[index+1]
+            self.commit_verb(text)
+        elif text.verb == 'VOTE':
+            text.target = content[index+1]
+            self.commit_verb(text)
+        elif text.verb == 'ATTACK':
+            text.target = content[index+1]
+            self.commit_verb(text)
+        elif text.verb == 'DIVINED':
+            text.target = content[index+1]
             text.species = content[index+2]
-        elif content[index] == 'VOTED':
-            text.target = parse_agent(content[index+1])
-        elif content[index] == 'ATTACKED':
-            text.target = parse_agent(content[index+1])
-        elif content[index] == 'AGREE':
+            self.commit_verb(text)
+        elif text.verb == 'VOTED':
+            text.target = content[index+1]
+            self.commit_verb(text)
+        elif text.verb == 'ATTACKED':
+            text.target = content[index+1]
+            self.commit_verb(text)
+        elif text.verb == 'AGREE':
             text.talk_number = content[index+1]
-        elif content[index] == 'DISAGREE':
+            self.commit_verb(text)
+        elif text.verb == 'DISAGREE':
             text.talk_number = content[index+1]
-        elif content[index] == 'Over':
+            self.commit_verb(text)
+        elif text.verb == 'Over':
+            self.commit_verb(text)
             return text
-        elif content[index] == 'Skip':
+        elif text.verb == 'Skip':
+            self.commit_verb(text)
             return text
         else:
             text.verb = ''
             index -= 1
+        index += 1
 
         text.operator = content[index]
-        index += 1
-        if content[index] == 'REQUEST':
-            text.target = parse_agent(content[index+1])
-            text.sentence.append(talk_content(
-                text.split_bracket(content[index+2:], 1)))
-        elif content[index] == 'INQUIRE':
-            text.target = parse_agent(content[index+1])
-            text.sentence.append(talk_content(
-                text.split_bracket(content[index+2:], 1)))
-        elif content[index] == 'BECAUSE':
-            text.sentence.append(talk_content(
-                text.split_bracket(content[index+1:], 2)))
-        elif content[index] == 'DAY':
+        if text.operator == 'REQUEST':
+            text.target = content[index+1]
+            op_subject = text.target
+            text.sentence += self.split_bracket(content[index+2:], op_subject)
+        elif text.operator == 'INQUIRE':
+            text.target = content[index+1]
+            op_subject = text.target
+            text.sentence += self.split_bracket(content[index+2:], op_subject)
+        elif text.operator == 'BECAUSE':
+            text.sentence += self.split_bracket(content[index+1:], op_subject)
+        elif text.operator == 'DAY':
             text.talk_number = content[index+1]
-            text.sentence.append(talk_content(
-                text.split_bracket(content[index+2:], 1)))
-        elif content[index] == 'NOT':
-            text.sentence.append(talk_content(
-                text.split_bracket(content[index+1:], 1)))
-        elif content[index] == 'AND':
-            text.sentence.append(talk_content(
-                text.split_bracket(content[index+1:], 0)))
-        elif content[index] == 'OR':
-            text.sentence.append(talk_content(
-                text.split_bracket(content[index+1:], 0)))
-        elif content[index] == 'XOR':
-            text.sentence.append(talk_content(
-                text.split_bracket(content[index+1:], 2)))
+            op_target = text.target
+            text.sentence += self.split_bracket(content[index+2:], op_subject)
+        elif text.operator == 'NOT':
+            text.sentence += self.split_bracket(content[index+1:], op_subject)
+        elif text.operator == 'AND':
+            text.sentence += self.split_bracket(content[index+1:], op_subject)
+        elif text.operator == 'OR':
+            text.sentence += self.split_bracket(content[index+1:], op_subject)
+        elif text.operator == 'XOR':
+            text.sentence += self.split_bracket(content[index+1:], op_subject)
         else:
             text.operator = ''
             index -= 1
+        index += 1
+
+        # text.print_text()
 
         return text
 
@@ -134,30 +227,47 @@ class Predictor_5(object):
         coef = []
         for i in range(168):
             coef.append(random.random())
-        param_data = [-0.0000172, 0., 0., -0.00004035, 0., 0.,
-                      -0.00002156, 0., 0., -0.00000157, 0., 0.,
-                      -0.00001756, 0., 0., 0., 0., 0.,
-                      -0.00006442, 0., 0., -0.00005788, 0., 0.,
-                      0.00000777, 0., 0., -0.00003353, 0., 0.,
-                      0., 0., 0., 0.00003804, 0., 0.,
-                      -0.00004614, 0., 0., -0.00004655, 0., 0.,
-                      -0.00003882, 0., 0., 0., 0., 0.,
-                      0.00029176, -0.00015814, -0.00003443, 0., 0., 0.,
-                      0.00024926, -0.00089807, 0.00003039, 0., 0., 0.,
-                      0.00018271, -0.00014811, 0.00007247, 0., 0., 0.,
-                      0.00026703, -0.00015246, -0.0000621, 0., 0., 0.]
-        param_data = coef
+        param_data = [-0.00002605, 0., 0., 0., 0., 0.,
+                      0., 0., 0., -0.00000409, 0., 0.,
+                      0., 0., 0., 0., 0., 0.,
+                      -0.00001614, 0., 0., 0., 0., 0.,
+                      0., 0., 0., -0.00000404, 0., 0.,
+                      0., 0., 0., 0., 0., 0.,
+                      -0.00010474, 0., 0., 0., 0., 0.,
+                      0., 0., 0., 0., 0., 0.,
+                      0., 0., 0., 0., 0., 0.,
+                      -0.00009952, 0., 0., 0., 0., 0.,
+                      0., 0., 0., -0.00004602, 0., 0.,
+                      0., 0., 0., 0., 0., 0.,
+                      0.00002241, 0., 0., 0., 0., 0.,
+                      0., 0., 0., 0.00000861, 0., 0.,
+                      0., 0., 0., 0., 0., 0.,
+                      0., 0., 0., 0., 0., 0.,
+                      0., 0., 0., 0.00004657, 0., 0.,
+                      0., 0., 0., 0., 0., 0.,
+                      -0.0000456, 0., 0., 0., 0., 0.,
+                      0., 0., 0., -0.00002542, 0., 0.,
+                      0., 0., 0., 0., 0., 0.,
+                      -0.00002329, 0., 0., 0., 0., 0.,
+                      0., 0., 0., 0., 0., 0.,
+                      0., 0., 0., 0., 0., 0.,
+                      0.00024544, -0.0000717, 0., 0., 0., 0.,
+                      0.00015273, -0.00080324, 0., 0., 0., 0.,
+                      0.00023144, -0.00001672, 0., 0., 0., 0.,
+                      0.00020006, -0.00009929, 0., 0., 0., 0.]
+        #param_data = coef
 
         num = 0
-        for i in range(4):
+        amp = 10000
+        for k in range(9):
             for j in range(4):
-                for k in range(3):
-                    self.para_3d[i, j, k] = param_data[num]
+                for i in range(4):
+                    self.para_3d[i, j, k] = param_data[num] * amp
                     num += 1
 
-        for i in range(4):
-            for j in range(6):
-                self.para_2d[i, j] = param_data[num]
+        for j in range(6):
+            for i in range(4):
+                self.para_2d[i, j] = param_data[num] * amp
                 num += 1
 
         self.x_3d = np.zeros((5, 5, self.n_para_3d), dtype='float32')
@@ -231,8 +341,9 @@ class Predictor_5(object):
                 self.x_2d[gamedf.agent[i] - 1, 1] = 1
             # talk
             elif gamedf.type[i] == 'talk':
-                content = self.talk_content(gamedf.text[i])
-                print(content)
+                content = gamedf.text[i].split()
+                content = self.talk_content(content, gamedf.agent[i])
+
                 """
                 if content.subject == 'UNSPEC':
                     content.subject = gamedf.agent[i]
