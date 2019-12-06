@@ -4,6 +4,9 @@ import math
 import inspect
 import random
 
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.externals import joblib
+
 
 class Talking():
     def __init__(self):
@@ -47,6 +50,8 @@ class Predictor_5(object):
             content.target = self.parse_agent(content.target)
         # content.print_text()
         if content.verb == 'ESTIMATE':
+            pass
+            """
             if content.role == 'SEER':
                 self.x_3d[content.subject - 1, content.target - 1, 5:9] = 0
                 self.x_3d[content.subject - 1, content.target - 1, 5] = 1
@@ -59,6 +64,7 @@ class Predictor_5(object):
             elif content.role == 'WEREWOLF':
                 self.x_3d[content.subject - 1, content.target - 1, 5:9] = 0
                 self.x_3d[content.subject - 1, content.target - 1, 8] = 1
+            """
         elif content.verb == 'COMINGOUT':
             if content.role == 'SEER':
                 self.x_2d[content.target - 1, 2:6] = 0
@@ -93,9 +99,11 @@ class Predictor_5(object):
         elif content.verb == 'ATTACKED':
             pass
         elif content.verb == 'AGREE':
-            self.x_3d[content.subject - 1, content.target - 1, 3] = 1
+            pass
+            # self.x_3d[content.subject - 1, content.target - 1, 3] = 1
         elif content.verb == 'DISAGREE':
-            self.x_3d[content.subject - 1, content.target - 1, 4] = 1
+            pass
+            # self.x_3d[content.subject - 1, content.target - 1, 4] = 1
         elif content.verb == 'Over':
             pass
         elif content.verb == 'Skip':
@@ -216,7 +224,7 @@ class Predictor_5(object):
         self.case5 = Tensor60()
 
         # num of param
-        self.n_para_3d = 9
+        self.n_para_3d = 3
         self.n_para_2d = 6
 
         # param_linear
@@ -225,40 +233,72 @@ class Predictor_5(object):
 
         # my param
         coef = []
-        for i in range(168):
+        for i in range(16*self.n_para_3d+4*self.n_para_2d):
             coef.append(random.random())
-        param_data = [-0.00002605, 0., 0., 0., 0., 0.,
-                      0., 0., 0., -0.00000409, 0., 0.,
+        """
+        param_data = [-0.00003623, 0., 0., 0., 0., 0.,
+                      0., -0.00060601, 0., 0.00001302, 0., 0.,
+                      0., 0., 0., 0., 0.00004525, 0.,
+                      -0.00002159, 0., 0., 0., 0., 0.,
+                      0., -0.00007022, 0., -0.00002428, 0., 0.,
+                      0., 0., 0., 0., -0.00047384, 0.,
+                      0.00000556, 0., 0., 0., 0., 0.,
+                      0., 0.00017959, 0., 0., 0., 0.,
                       0., 0., 0., 0., 0., 0.,
-                      -0.00001614, 0., 0., 0., 0., 0.,
-                      0., 0., 0., -0.00000404, 0., 0.,
+                      0.0000216, 0., 0., 0., 0., 0.,
+                      0., 0.00002713, 0., 0.0000755, 0., 0.,
+                      0., 0., 0., 0., 0.00019617, 0.,
+                      -0.00001461, 0., 0., 0., 0., 0.,
+                      0., -0.00101899, 0., -0.00002985, 0., 0.,
+                      0., 0., 0., 0., 0.00007986, 0.,
                       0., 0., 0., 0., 0., 0.,
-                      -0.00010474, 0., 0., 0., 0., 0.,
+                      0., 0., 0., -0.00002426, 0., 0.,
+                      0., 0., 0., 0., -0.00073417, 0.,
+                      -0.00002893, 0., 0., 0., 0., 0.,
+                      0., -0.00081483, 0., -0.00003396, 0., 0.,
+                      0., 0., 0., 0., 0.00002231, 0.,
+                      -0.00009073, 0., 0., 0., 0., 0.,
+                      0., -0.00001528, 0., 0., 0., 0.,
                       0., 0., 0., 0., 0., 0.,
+                      0.00009874, 0.00005715, -0.00006613, 0.00009886, 0., -0.00014259,
+                      -0.00000812, -0.00073654, -0.00013053, -0.00014469, 0., 0.,
+                      0.00006671, 0.0000109, 0.00018911, -0.00039457, 0., -0.00052088,
+                      0.00004278, 0.00000045, -0.00008088, -0.00004331, 0., -0.00012839]
+        """
+        """
+        param_data = [-0.44937885, 0., 0., 0., 0., 0.,
+                      0., -4.29410682, 0., -0.31440725, 0., 0.,
+                      0., 0., 0., 0., 1.26001485, 0.,
+                      -0.765859, 0., 0., 0., 0., 0.,
+                      0., 0.50660825, 0., -0.44947359, 0., 0.,
+                      0., 0., 0., 0., -4.29417714, 0.,
+                      1.52035712, 0., 0., 0., 0., 0.,
+                      0., 1.8354509, 0., 0., 0., 0.,
                       0., 0., 0., 0., 0., 0.,
-                      -0.00009952, 0., 0., 0., 0., 0.,
-                      0., 0., 0., -0.00004602, 0., 0.,
+                      1.40179841, 0., 0., 0., 0., 0.,
+                      0., 0.19727296, 0., 1.52004409, 0., 0.,
+                      0., 0., 0., 0., 1.83260564, 0.,
+                      0.0456091, 0., 0., 0., 0., 0.,
+                      0., -5.77817537, 0., -0.26760185, 0., 0.,
+                      0., 0., 0., 0., -0.12284941, 0.,
                       0., 0., 0., 0., 0., 0.,
-                      0.00002241, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0.00000861, 0., 0.,
+                      0., 0., 0., 0.04521815, 0., 0.,
+                      0., 0., 0., 0., -5.19625354, 0.,
+                      -0.44856732, 0., 0., 0., 0., 0.,
+                      0., -4.29571861, 0., -0.31342463, 0., 0.,
+                      0., 0., 0., 0., 1.25670174, 0.,
+                      -0.76527089, 0., 0., 0., 0., 0.,
+                      0., 0.50531041, 0., 0., 0., 0.,
                       0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0.00004657, 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.0000456, 0., 0., 0., 0., 0.,
-                      0., 0., 0., -0.00002542, 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.00002329, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.00024544, -0.0000717, 0., 0., 0., 0.,
-                      0.00015273, -0.00080324, 0., 0., 0., 0.,
-                      0.00023144, -0.00001672, 0., 0., 0., 0.,
-                      0.00020006, -0.00009929, 0., 0., 0., 0.]
+                      -0.16445261, 0.19249891, -1.13212256, -0.94208924, 0., -1.0587308,
+                      -0.36287069, -6.14398955, -1.02324861, -0.44908015, 0., -0.59414481,
+                      -0.03888866, 0.01033762, 2.54428191, -2.06819418, 0., -3.92382972,
+                      -0.16379426, 0.1925662, -1.13136157, -0.93751616, 0., -1.05480386]
+        """
         #param_data = coef
-
+        """
         num = 0
-        amp = 10000
+        amp = 1000
         for k in range(9):
             for j in range(4):
                 for i in range(4):
@@ -269,7 +309,7 @@ class Predictor_5(object):
             for i in range(4):
                 self.para_2d[i, j] = param_data[num] * amp
                 num += 1
-
+        """
         self.x_3d = np.zeros((5, 5, self.n_para_3d), dtype='float32')
         self.x_2d = np.zeros((5, self.n_para_2d), dtype='float32')
 
@@ -344,105 +384,6 @@ class Predictor_5(object):
                 content = gamedf.text[i].split()
                 content = self.talk_content(content, gamedf.agent[i])
 
-                """
-                if content.subject == 'UNSPEC':
-                    content.subject = gamedf.agent[i]
-
-                if content.verb == 'COMINGOUT':
-                    if content.role == 'SEER':
-                        self.x_2d[content.subject - 1, 2:5] = 0
-                        self.x_2d[content.subject - 1, 2] = 1
-                    elif content.role == 'VILLAGER':
-                        self.x_2d[content.subject - 1, 2:5] = 0
-                        self.x_2d[content.subject - 1, 3] = 1
-                    elif content.role == 'POSSESSED':
-                        self.x_2d[content.subject - 1, 2:5] = 0
-                        self.x_2d[content.subject - 1, 4] = 1
-                    elif content.role == 'WEREWOLF':
-                        self.x_2d[content.subject - 1, 2:5] = 0
-                        self.x_2d[content.subject - 1, 5] = 1
-                """
-                """
-                content = gamedf.text[i].split()
-                # comingout
-                if content[0] == 'COMINGOUT':
-                    # self
-                    if int(content[1][6:8]) == gamedf.agent[i]:
-                        if content[2] == 'SEER':
-                            self.x_2d[gamedf.agent[i] - 1, 2:5] = 0
-                            self.x_2d[gamedf.agent[i] - 1, 2] = 1
-                        elif content[2] == 'VILLAGER':
-                            self.x_2d[gamedf.agent[i] - 1, 2:5] = 0
-                            self.x_2d[gamedf.agent[i] - 1, 3] = 1
-                        elif content[2] == 'POSSESSED':
-                            self.x_2d[gamedf.agent[i] - 1, 2:5] = 0
-                            self.x_2d[gamedf.agent[i] - 1, 4] = 1
-                        elif content[2] == 'WEREWOLF':
-                            self.x_2d[gamedf.agent[i] - 1, 2:5] = 0
-                            self.x_2d[gamedf.agent[i] - 1, 5] = 1
-                # divined
-                elif content[0] == 'DIVINED':
-                    # regard comingout
-                    self.x_2d[gamedf.agent[i] - 1, 2:5] = 0
-                    self.x_2d[gamedf.agent[i] - 1, 2] = 1
-                    # result
-                    if content[2] == 'HUMAN':
-                        self.x_3d[gamedf.agent[i] - 1,
-                                  int(content[1][6:8])-1, 1] = 1
-                        self.x_3d[gamedf.agent[i] - 1,
-                                  int(content[1][6:8])-1, 2] = 0
-                    elif content[2] == 'WEREWOLF':
-                        self.x_3d[gamedf.agent[i] - 1,
-                                  int(content[1][6:8])-1, 2] = 1
-                        self.x_3d[gamedf.agent[i] - 1,
-                                  int(content[1][6:8])-1, 1] = 0
-
-                elif content[0] == 'ESTIMATE':
-                    # result
-                    if content[2] == 'SEER':
-                        self.x_3d[gamedf.agent[i] - 1,
-                                  int(content[1][6:8])-1, 1] = 1
-                        self.x_3d[gamedf.agent[i] - 1,
-                                  int(content[1][6:8])-1, 2] = 0
-                    elif content[2] == 'WEREWOLF':
-                        self.x_3d[gamedf.agent[i] - 1,
-                                  int(content[1][6:8])-1, 2] = 1
-                        self.x_3d[gamedf.agent[i] - 1,
-                                  int(content[1][6:8])-1, 1] = 0
-                # because
-                elif content[0] == 'BECAUSE':
-                    # remove reason
-                    kakko = 0
-                    first = 0
-                    for index, item in enumerate(content):
-                        kakko += item.count('(')
-                        kakko -= item.count(')')
-                        if kakko == 0 and index != 0:
-                            first = index + 1
-                            # print("because kakko detected")
-                            # print(content)
-                            break
-                    content = content[first:]
-
-                    # remove AND,OR
-                    if content[0] == 'OR' or content[0] == 'XOR'or content[0] == 'AND' or content[0] == 'NOT':
-                        kakko = 0
-                        first = 0
-                        for index, item in enumerate(content):
-                            kakko += item.count('(')
-                            kakko -= item.count(')')
-                            if kakko == 1 and index != 0:
-                                first = index + 1
-                                break
-
-                    content = self.remove_kakko(content)
-                    # print(content)
-                    for item in content:
-                        pass
-                        # if item ==
-                """
-                pass
-
     def update_df(self):
         # update 60 dataframe
         self.df_pred = self.case5.apply_tensor_df(self.x_3d, self.x_2d,
@@ -453,12 +394,16 @@ class Predictor_5(object):
     def update_pred(self):
         # predict
         # Linear
+
         l_para = np.append(self.para_3d.reshape(
             (4*4*self.n_para_3d, 1)), self.para_2d.reshape((4*self.n_para_2d, 1)))
         self.df_pred["pred"] = np.matmul(
             self.df_pred.values, l_para.reshape(-1, 1))
         self.df_pred["pred"] = np.exp(-np.log(10)*self.df_pred["pred"])
-
+        """
+        model = joblib.load('ebiwolf.pkl')
+        self.df_pred["pred"] = model.predict(self.df_pred.values)
+        """
         # average
         self.p_60 = self.df_pred["pred"] / self.df_pred["pred"].sum()
 

@@ -14,6 +14,9 @@ import aiwolfpy.ebifly
 
 from sklearn.svm import SVC
 
+from sklearn.externals import joblib
+from sklearn.ensemble import RandomForestClassifier
+
 predictor = aiwolfpy.ebifly.Predictor_5()
 
 
@@ -76,12 +79,13 @@ for files in file_list:
     match_num += 1
 
 days = 3
-x_1000 = np.zeros((60*2*days*match_num, 168))
+# x_1000 = np.zeros((60*2*days*match_num, 168))
+x_1000 = np.zeros((60*2*days*match_num, 72))
 y_1000 = np.zeros(60*2*days*match_num)
 
 ind = 0
 filecount = 0
-for i in range(1):
+for i in range(match_num):
     # log_path = "../log/gat2017log05/000/" + "{0:03d}".format(i) + ".log"
     # log_path = '../../Server/AIWolf-ver0.5.6/log/file'+'{}'.format(filenum)+'/AIWolf20191002' + '{0:03d}'.format(i) + '.log'
     log_path = file_list[filecount]
@@ -102,8 +106,11 @@ for i in range(1):
 
 
 model = sklearn.linear_model.LogisticRegression()
-#model = SVC(kernel='linear', random_state=None)
+# model = SVC(kernel='linear', random_state=None)
+# model = RandomForestClassifier()
 model.fit(x_1000, y_1000)
+
+joblib.dump(model, 'ebiwolf.pkl')
 
 np.set_printoptions(suppress=True)
 
