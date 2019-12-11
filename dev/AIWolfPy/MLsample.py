@@ -72,15 +72,15 @@ def game_data_filter(df, day, phase='daily_initialize', agent=0):
 # build data for 100 games
 # takes several minutes
 match_num = 0
-filenum = 30
+filenum = 1
 file_list = glob.glob(
     '../../Server/AIWolf-ver0.5.6/log/file'+'{}'.format(filenum)+'/*.log')
 for files in file_list:
     match_num += 1
 
 days = 3
-# x_1000 = np.zeros((60*2*days*match_num, 168))
-x_1000 = np.zeros((60*2*days*match_num, 72))
+x_1000 = np.zeros((60*2*days*match_num, 168))
+# x_1000 = np.zeros((60*2*days*match_num, 72))
 y_1000 = np.zeros(60*2*days*match_num)
 
 ind = 0
@@ -105,9 +105,9 @@ for i in range(match_num):
             filecount += 1
 
 
-model = sklearn.linear_model.LogisticRegression()
+# model = sklearn.linear_model.LogisticRegression()
 # model = SVC(kernel='linear', random_state=None)
-# model = RandomForestClassifier()
+model = RandomForestClassifier()
 model.fit(x_1000, y_1000)
 
 joblib.dump(model, 'ebiwolf.pkl')
