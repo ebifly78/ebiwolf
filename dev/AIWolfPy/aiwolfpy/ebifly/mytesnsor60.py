@@ -11,8 +11,8 @@ class Tensor60(object):
 
         self.role = ['VILLAGER', 'WEREWOLF', 'POSSESSED', 'SEER']
         self.species = ['HUMAN', 'WEREWOLF']
-        self.verb = ['ESTIMATE', 'COMINGOUT', 'DIVINATION', 'GUARD', 'VOTE',
-                     'ATTACK', 'DIVINED', 'IDENTIFIED', 'GUARDED', 'VOTED', 'ATTACKED']
+        self.verb = ['ESTIMATE', 'COMINGOUT', 'DIVINATION', 'VOTE',
+                     'ATTACK', 'DIVINED', 'VOTED', 'ATTACKED']
         self.prot = ['vote', 'execute', 'dead']
         self.action = self.verb + self.prot
         self.object = self.role + self.species

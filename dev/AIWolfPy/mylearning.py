@@ -10,7 +10,7 @@ import sklearn.linear_model
 import math
 
 import aiwolfpy
-import aiwolfpy.ebifly
+import aiwolfpy.ebifly as ebi
 
 from sklearn.svm import SVC
 
@@ -79,7 +79,7 @@ for files in file_list:
     match_num += 1
 
 days = 3
-x_1000 = np.zeros((60*2*days*match_num, 1344))
+x_1000 = np.zeros((60*2*days*match_num, predictor.n_para))
 # x_1000 = np.zeros((60*2*days*match_num, 72))
 y_1000 = np.zeros(60*2*days*match_num)
 
