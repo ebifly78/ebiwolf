@@ -16,26 +16,38 @@ from sklearn.svm import SVC
 
 from sklearn.externals import joblib
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix
+
+np.set_printoptions(suppress=True)
+np.set_printoptions(threshold=np.inf)
+pd.set_option('display.max_columns', None)
+pd.set_option("display.max_rows", None)
+
 
 predictor = aiwolfpy.ebifly.Predictor_5()
 
 
-def game_data_filter(df, day, phase='daily_initialize', agent=0):
+def game_data_filter(df, day, agent=0):
 
     y = np.zeros(60)
+    z = np.zeros(60)
 
-    # werewolf, possessed
     for i in range(1, 6):
         role = df["text"][i - 1].split()[2]
         if role == "WEREWOLF":
             werewolf = i
         elif role == "POSSESSED":
             possessed = i
+        elif role == "SEER":
+            seer = i
 
     for i in range(60):
-        if predictor.case5.case60_df["agent_"+str(possessed)][i] == 2:
-            if predictor.case5.case60_df["agent_"+str(werewolf)][i] == 1:
-                y[i] = 1
+        if predictor.case5.case60_df["agent_"+str(werewolf)][i] == 1:
+            z[i] = 1
+            if predictor.case5.case60_df["agent_"+str(seer)][i] == 3:
+                if predictor.case5.case60_df["agent_"+str(possessed)][i] == 2:
+                    y[i] = 1
 
     # role
     role = "VILLAGER"
@@ -55,71 +67,73 @@ def game_data_filter(df, day, phase='daily_initialize', agent=0):
     if agent == 0:
         agent = 1
 
-    # filter by time
-    if phase == 'daily_initialize':
-        df = df[df["day"] < day]
-    else:
-        df = df[(df["day"] < day) | (
-            (df["day"] == day) & (df["type"] == 'talk'))]
+    df = df[(df["day"] < day) | ((df["day"] == day) & (df["type"] == 'talk'))]
 
-    predictor.initialize({"agent": agent, "roleMap": {str(agent): role}}, {})
+    predictor.initialize(
+        {"agentIdx": agent, "roleMap": {str(agent): role}}, {})
     predictor.update_features(df.reset_index())
     predictor.update_df()
 
-    return predictor.df_pred, y
+    return predictor.df_pred, y, z
 
 
 # build data for 100 games
 # takes several minutes
 match_num = 0
-filenum = 1
-file_list = glob.glob(
-    '../../Server/AIWolf-ver0.5.6/log/file'+'{}'.format(filenum)+'/*.log')
+foldernum = 20
+file_list = []
+folder_list = ['../../Server/AIWolf-ver0.5.6/log/file' +
+               '{}'.format(foldernum)+'/']
+# folder_list = glob.glob('../../Server/AIWolf-ver0.5.6/log/log_cedec2018/*')
+
+for folder in folder_list:
+    file_list += glob.glob(folder + '/*')
 for files in file_list:
     match_num += 1
 
 days = 3
-x_1000 = np.zeros((60*2*days*match_num, predictor.n_para))
-# x_1000 = np.zeros((60*2*days*match_num, 72))
-y_1000 = np.zeros(60*2*days*match_num)
+x_data = np.zeros((60*days*match_num, predictor.n_para))
+y_data = np.zeros(60*days*match_num)
+z_data = np.zeros(60*days*match_num)
 
 ind = 0
 filecount = 0
-for i in range(match_num):
-    # log_path = "../log/gat2017log05/000/" + "{0:03d}".format(i) + ".log"
-    # log_path = '../../Server/AIWolf-ver0.5.6/log/file'+'{}'.format(filenum)+'/AIWolf20191002' + '{0:03d}'.format(i) + '.log'
-    log_path = file_list[filecount]
 
+for files in file_list:
     for d in range(days):
-        x, y = game_data_filter(aiwolfpy.read_log(
-            log_path), day=d, phase='vote')
-        x_1000[(ind*60):((ind+1)*60), :] = x
-        y_1000[(ind*60):((ind+1)*60)] = y
+        x, y, z = game_data_filter(aiwolfpy.read_log(files), day=d)
+        x_data[(ind*60):((ind+1)*60), :] = x
+        y_data[(ind*60):((ind+1)*60)] = y
+        z_data[(ind*60):((ind+1)*60)] = z
         ind += 1
-        x, y = game_data_filter(aiwolfpy.read_log(
-            log_path), day=d+1, phase='daily_initialize')
-        x_1000[(ind*60):((ind+1)*60), :] = x
-        y_1000[(ind*60):((ind+1)*60)] = y
-        ind += 1
+
         if d == 0:
             filecount += 1
 
-
-model = sklearn.linear_model.LogisticRegression()
+# model = sklearn.linear_model.LogisticRegression()
 # model = SVC(kernel='linear', random_state=None)
-#model = RandomForestClassifier()
-model.fit(x_1000, y_1000)
+model = RandomForestClassifier()
 
-#joblib.dump(model, 'ebiwolf.pkl')
+model.fit(x_data, y_data)
+joblib.dump(model, 'ebiwolf.pkl')
 
-np.set_printoptions(suppress=True)
-np.set_printoptions(threshold=np.inf)
-pd.set_option('display.max_columns', None)
-pd.set_option("display.max_rows", None)
-
-print('file'+'{}'.format(filenum))
+print('file'+'{}'.format(foldernum))
 print(str(filecount)+'files')
-print(np.array2string(model.coef_, separator=','))
+
+# print("modelData")
+# print(model.coef_)
+# print(x.columns.values)
+
+fti = model.feature_importances_
+ids = np.argsort(fti)[::-1]
 print("modelData")
-print(model.coef_)
-print(x.columns.values)
+for i in range(len(ids)):
+    for j in ids:
+        if j == i:
+            print('{0:20s} : {1:>.6f}'.format(
+                x.columns.values[ids[i]], fti[ids[i]]))
+        if fti[ids[i]] == 0:
+            break
+    else:
+        continue
+    break

@@ -15,22 +15,19 @@ myname = 'ebifly'
 class PythonPlayer(object):
 
     def __init__(self, agent_name):
-        # myname
         self.myname = agent_name
         self.predicter_5 = ebi.Predictor_5()
+        self.myRole = 0
 
     def getName(self):
         return self.myname
 
     def initialize(self, base_info, diff_data, game_setting):
         self.base_info = base_info
-        # game_setting
         self.game_setting = game_setting
 
-        # initialize
         self.predicter_5.initialize(base_info, game_setting)
 
-        ### EDIT FROM HERE ###
         self.divined_list = []
         self.comingout = ''
         self.myresult = ''
@@ -39,16 +36,16 @@ class PythonPlayer(object):
 
     def get_p60(self, base_info):
         if base_info['myRole'] == 'VILLAGER':
-            myRole = 0
+            self.myRole = 0
         elif base_info['myRole'] == 'WEREWOLF':
-            myRole = 1
+            self.myRole = 1
         elif base_info['myRole'] == 'POSSESSED':
-            myRole = 2
+            self.myRole = 2
         elif base_info['myRole'] == 'SEER':
-            myRole = 3
+            self.myRole = 3
 
         p_60 = self.predicter_5.possible_60(
-            myRole, base_info['statusMap'])
+            self.myRole, base_info['statusMap'])
         p_60 = p_60 / p_60.sum()
 
         return p_60
@@ -61,25 +58,25 @@ class PythonPlayer(object):
 
         return p_5
 
-    def highest(self, p_60, role):
+    def highest(self, role):
         p = -1
         idx = 1
-        p_mat = self.role_p(p_60)
+        p_mat = self.role_p(self.predicter_5.p_60)
         for i in range(5):
             if p_mat[i, role] > p:
                 p = p_mat[i, role]
                 idx = i
-        return idx
+        return idx + 1
 
-    def lowest(self, p_60, role):
+    def lowest(self, role):
         p = 1
         idx = 1
-        p_mat = self.role_p(p_60)
+        p_mat = self.role_p(self.predicter_5.p_60)
         for i in range(5):
             if p_mat[i, 1] < p:
                 p = p_mat[i, 1]
                 idx = i
-        return idx
+        return idx + 1
 
     def update(self, base_info, diff_data, request):
         self.base_info = base_info
@@ -95,7 +92,14 @@ class PythonPlayer(object):
                 # DIVINE
                 if diff_data['type'][i] == 'divine':
                     self.not_reported = True
+                    self.DivWolf = 0
                     self.myresult = diff_data['text'][i]
+                    res = self.myresult.split()
+                    if res[2] == 'WEREWOLF':
+                        res = res[1]
+                        res = res.strip('Agent[0')
+                        res = res.strip(']')
+                        self.DivWolf = int(res)
 
             # POSSESSED
             if self.base_info['myRole'] == 'POSSESSED':
@@ -128,7 +132,7 @@ class PythonPlayer(object):
             self.not_reported = False
             # FAKE DIVINE
             # highest prob ww in alive agents
-            idx = self.highest(self.get_p60(self.base_info), 1)
+            idx = self.highest(1)
             self.myresult = 'DIVINED Agent[' + \
                 "{0:02d}".format(idx) + '] ' + 'HUMAN'
             return self.myresult
@@ -146,33 +150,41 @@ class PythonPlayer(object):
 
     def vote(self):
         if self.base_info['myRole'] == "WEREWOLF":
-            idx = self.highest(self.get_p60(self.base_info), 3)
+            idx = self.highest(3)
         elif self.base_info['myRole'] == "POSSESSED":
-            idx = self.highest(self.get_p60(self.base_info), 3)
+            idx = self.highest(3)
         elif self.base_info['myRole'] == "SEER":
-            idx = self.highest(self.get_p60(self.base_info), 1)
+            idx = self.highest(1)
+            if self.DivWolf != 0:
+                idx = self.DivWolf
         else:
-            idx = self.highest(self.get_p60(self.base_info), 1)
+            idx = self.highest(1)
         return idx
 
     def attack(self):
-        idx = self.lowest(self.get_p60(self.base_info), 1)
+        idx = self.lowest(1)
         return idx
 
     def divine(self):
+
+        if self.base_info['day'] == 0:
+            if self.base_info['agentIdx'] != self.game_setting['playerNum']:
+                return self.base_info['agentIdx'] + 1
+            else:
+                return 1
+
         # highest prob ww in alive and not divined agents provided watashi ningen
         p = -1
-        idx = 1
-        p_mat = self.role_p(p_60)
+        p_mat = self.role_p(self.predicter_5.p_60)
         for i in range(5):
-            if p_mat[i, role] > p and i not in self.divined_list:
-                p = p_mat[i, role]
+            if p_mat[i, 1] > p and i not in self.divined_list:
+                p = p_mat[i, 1]
                 idx = i
         self.divined_list.append(idx)
-        return idx
+        return idx + 1
 
     def finish(self):
-        pass
+        return
 
 
 agent = PythonPlayer(myname)

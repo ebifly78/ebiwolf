@@ -18,7 +18,6 @@ class Tensor60(object):
         self.object = self.role + self.species
 
         ind = 0
-        # case60
         for w in range(5):
             for p in range(5):
                 for s in range(5):
@@ -31,7 +30,6 @@ class Tensor60(object):
         self.case60_df = pd.DataFrame(self.case60)
         self.case60_df.columns = ["agent_" + str(i) for i in range(1, 6)]
 
-        # tensor60_3d
         for ind in range(60):
             for i in range(5):
                 for j in range(5):

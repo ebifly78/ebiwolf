@@ -12,3 +12,4 @@ read_log
 activate.sh
 logs
 click.workflow
+dev/agent/*

@@ -22,14 +22,16 @@ class Talking():
         self.sentence = []
 
     def print_text(self):
-        print(self.subject)
-        print(self.target)
-        print(self.role)
-        print(self.species)
-        print(self.action)
-        print(self.operator)
-        print(self.talk_number)
-        print(self.sentence)
+        s = 'Talking'
+        s += '_' + str(self.subject)
+        s += '_' + str(self.target)
+        s += '_' + str(self.role)
+        s += '_' + str(self.species)
+        s += '_' + str(self.action)
+        s += '_' + str(self.operator)
+        s += '_' + str(self.talk_number)
+        s += '_' + str(len(self.sentence))
+        print(s)
 
 
 class Predictor_5(object):
@@ -49,11 +51,16 @@ class Predictor_5(object):
 
     def commit_action(self, content):
         if content.subject == 'ANY':
-            return
+            for i in range(5):
+                content.subject = i
+                self.commit_action(content)
         else:
             content.subject = self.parse_agent(content.subject)
+
         if content.target == 'ANY':
-            return
+            for i in range(5):
+                content.target = i
+                self.commit_action(content)
         else:
             content.target = self.parse_agent(content.target)
 
@@ -61,9 +68,9 @@ class Predictor_5(object):
             a = self.get_index(content.action)
             o = self.get_index(content.role)
             self.x_para[content.subject - 1, content.target - 1, a, o] += 1
+            # content.print_text()
 
-        for sentenses in content.sentence:
-            self.commit_action(sentenses)
+        return
 
     def split_bracket(self, content, op_subject):
         list1 = []
@@ -99,45 +106,33 @@ class Predictor_5(object):
             text.subject = op_subject
 
         text.action = content[index]
-        # text.target = self.#parse_agent(content[index+1])
+
         if text.action == 'ESTIMATE':
             text.target = content[index+1]
             text.role = content[index+2]
-            self.commit_action(text)
         elif text.action == 'COMINGOUT':
             text.target = content[index+1]
             text.role = content[index+2]
-            self.commit_action(text)
         elif text.action == 'DIVINATION':
             text.target = content[index+1]
-            self.commit_action(text)
         elif text.action == 'VOTE':
             text.target = content[index+1]
-            self.commit_action(text)
         elif text.action == 'ATTACK':
             text.target = content[index+1]
-            self.commit_action(text)
         elif text.action == 'DIVINED':
             text.target = content[index+1]
             text.species = content[index+2]
-            self.commit_action(text)
         elif text.action == 'VOTED':
             text.target = content[index+1]
-            self.commit_action(text)
         elif text.action == 'ATTACKED':
             text.target = content[index+1]
-            self.commit_action(text)
         elif text.action == 'AGREE':
             text.talk_number = content[index+1]
-            self.commit_action(text)
         elif text.action == 'DISAGREE':
             text.talk_number = content[index+1]
-            self.commit_action(text)
         elif text.action == 'Over':
-            self.commit_action(text)
             return text
         elif text.action == 'Skip':
-            self.commit_action(text)
             return text
         else:
             text.action = ''
@@ -155,7 +150,6 @@ class Predictor_5(object):
             text.sentence += self.split_bracket(content[index+2:], op_subject)
         elif text.operator == 'BECAUSE':
             text.sentence += self.split_bracket(content[index+1:], op_subject)
-            self.commit_action(text.sentence[1])
         elif text.operator == 'DAY':
             text.talk_number = content[index+1]
             op_target = text.target
@@ -173,8 +167,6 @@ class Predictor_5(object):
             index -= 1
         index += 1
 
-        # text.print_text()
-
         return text
 
     def __init__(self):
@@ -186,201 +178,6 @@ class Predictor_5(object):
         self.n_object = len(self.case5.object)
         self.n_para = self.n_role * self.n_role * self.n_action * self.n_object
 
-        # param
-        self.param = np.zeros(
-            (self.n_role, self.n_role, self.n_action, self.n_object))
-
-        # my param
-        coef = []
-        for i in range(self.n_para):
-            coef.append(random.random())
-
-        param_data = [0., -0.69802066, -1.36021126, 0., 0., 0.,
-                      -1.8637926, -1.47987468, 0., -0.09469956, 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.14655044, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.36303599, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.78108527, 0., 0., 0., 0., 0.,
-                      -0.17248876, 0., 0., 0., 0., 0.,
-                      0.33613405, 0., 0., 0., 0., 0.,
-                      0., 2.12293952, -1.14729554, 0., 0., 0.,
-                      0., -0.46095134, 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.3221005, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.14448648, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.72987778, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., -1.40352913, 0.82238703, 0., 0., 0.,
-                      0., -3.40137883, 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.17597479, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -1.1393652, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.74268157, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., -0.65053349, -1.37818737, 0., 0., 0.,
-                      0., -1.48148427, 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.02488798, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.32669799, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.73303741, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 4.36941294, -3.55782947, 0., 0., 0.,
-                      0., 3.11505426, 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.41526164, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.20911929, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      2.42942915, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -1.8502463, 0., 0., -1.09029864, 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -6.15793274, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.17065503, 0., 0., 0., 0., 0.,
-                      -5.69990876, 0., 0., 0., 0., 0.,
-                      0., 1.12266822, -1.38523034, 0., 0., 0.,
-                      0., 5.69028096, 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.52557344, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.30258527, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      2.26032142, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 3.93496018, -3.11234062, 0., 0., 0.,
-                      0., 2.51925634, 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.42161247, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.19300495, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      2.40881448, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., -0.09072989, -3.54189737, 0., 0., 0.,
-                      0., -0.90305735, 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.47578682, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.58566071, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.11424103, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0.12400827, -0.29759426, 0., 0., 0.,
-                      0., -1.50628116, 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.81949068, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.58201162, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.27237135, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -1.18355391, 0., 0., 1.37531827, 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -4.8187325, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.1755162, 0., 0., 0., 0., 0.,
-                      0.10984745, 0., 0., 0., 0., 0.,
-                      0., -0.10685336, -3.27677969, 0., 0., 0.,
-                      0., -0.60035208, 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.48347357, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.60356506, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.09411652, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., -0.66452012, -1.36430302, 0., 0., 0.,
-                      0., -1.94710414, 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.01926367, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.33605031, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.69914952, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 2.00707262, -1.03726526, 0., 0., 0.,
-                      0., -0.62071346, 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.30759749, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.15184632, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.70742537, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., -1.39928487, 0.81091306, 0., 0., 0.,
-                      0., -2.5512744, 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.16223461, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -1.13844942, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.72354806, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -1.83837465, 0., 0., -0.07326819, 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0.31274008, 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      0., 0., 0., 0., 0., 0.,
-                      -0.15912047, 0., 0., 0., 0., 0.,
-                      0.32405942, 0., 0., 0., 0., 0.]
-        # param_data = coef
-
-        num = 0
-        for l in range(self.n_object):
-            for k in range(self.n_action):
-                for j in range(self.n_role):
-                    for i in range(self.n_role):
-                        self.param[i, j, k, l] = param_data[num]
-                        num += 1
-
         self.x_para = np.zeros(
             (5, 5, self.n_action, self.n_object), dtype='float32')
 
@@ -389,14 +186,16 @@ class Predictor_5(object):
         self.base_info = base_info
 
         self.watshi_xxx = np.ones((60, self.n_role))
-
-        # use for Machine Learning
-        if inspect.currentframe().f_back.f_code.co_filename == 'agent_ebifly.py' or inspect.currentframe().f_back.f_code.co_filename == 'myagent.py':
+        """
+        if inspect.currentframe().f_back.f_code.co_filename == 'myagent.py':
             xv = self.case5.get_case60_df(
             )["agent_"+str(self.base_info['agentIdx'])].values
         else:
             xv = self.case5.get_case60_df(
             )["agent_"+str(self.base_info['agent'])].values
+        """
+        xv = self.case5.get_case60_df(
+        )["agent_"+str(self.base_info['agentIdx'])].values
 
         for i in range(self.n_role):
             self.watshi_xxx[xv != i, i] = 0.0
@@ -430,7 +229,17 @@ class Predictor_5(object):
             # talk
             elif gamedf.type[i] == 'talk':
                 content = gamedf.text[i].split()
+                # print(content)
                 content = self.talk_content(content, gamedf.agent[i])
+                if content.action in self.case5.action:
+                    self.commit_action(content)
+                if content.operator in self.case5.object:
+                    if content.operator == 'BECAUSE':
+                        if content.sentence[1].operator in self.case5.object:
+                            for text in content.sentence[1].sentence:
+                                self.commit_action(text)
+                        else:
+                            self.commit_action(content.sentence[1])
 
     def update_df(self):
         # update 60 dataframe
@@ -446,16 +255,33 @@ class Predictor_5(object):
                         self.names.append(s)
         self.df_pred = self.case5.apply_tensor_df(self.x_para, self.names)
 
-    def update_pred(self):
-        l_para = self.param.reshape(self.n_para, 1)
-        self.df_pred["pred"] = np.matmul(
-            self.df_pred.values, l_para.reshape(-1, 1))
-        self.p_60 = self.df_pred["pred"]
+    def possible_60(self):
+        agentIdx = str(self.base_info['agentIdx'])
+        myRole = self.base_info['roleMap'][agentIdx]
+        if myRole == 'VILLAGER':
+            myRole = 0
+        elif myRole == 'WEREWOLF':
+            myRole = 1
+        elif myRole == 'POSSESSED':
+            myRole = 2
+        elif myRole == 'SEER':
+            myRole = 3
 
-    def possible_60(self, myRole, statusMap):
         p = self.p_60 * self.watshi_xxx[:, myRole]
         for ind in range(60):
             i = np.where(self.case5.case60[ind, :] == 1)[0][0] + 1
-            if statusMap[str(i)] != 'ALIVE':
-                p[ind, 1] = 0.0
+            try:
+                if self.base_info['statusMap'][str(i)] != 'ALIVE':
+                    p[ind, 1] = 0.0
+            except KeyError:
+                pass
+
         return p
+
+    def update_pred(self):
+        model = joblib.load('ebiwolf.pkl')
+        self.df_pred["pred"] = model.predict_proba(self.df_pred.values)[:, 1]
+        self.p_60 = self.df_pred["pred"]
+        self.p_60 = self.possible_60()
+        self.p_60 = self.p_60 / self.p_60.sum()
+        self.df_pred["pred"] = self.p_60
