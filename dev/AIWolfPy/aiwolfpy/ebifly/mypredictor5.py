@@ -255,9 +255,10 @@ class Predictor_5(object):
                         self.names.append(s)
         self.df_pred = self.case5.apply_tensor_df(self.x_para, self.names)
 
-    def possible_60(self):
+    def possible_60(self, p_60):
         agentIdx = str(self.base_info['agentIdx'])
         myRole = self.base_info['roleMap'][agentIdx]
+
         if myRole == 'VILLAGER':
             myRole = 0
         elif myRole == 'WEREWOLF':
@@ -267,21 +268,15 @@ class Predictor_5(object):
         elif myRole == 'SEER':
             myRole = 3
 
-        p = self.p_60 * self.watshi_xxx[:, myRole]
+        p = p_60 * self.watshi_xxx[:, myRole]
         for ind in range(60):
             i = np.where(self.case5.case60[ind, :] == 1)[0][0] + 1
-            try:
-                if self.base_info['statusMap'][str(i)] != 'ALIVE':
-                    p[ind, 1] = 0.0
-            except KeyError:
-                pass
+            if self.base_info['statusMap'][str(i)] != 'ALIVE':
+                p[ind, 1] = 0.0
 
-        return p
+        return p / p.sum()
 
     def update_pred(self):
         model = joblib.load('ebiwolf.pkl')
-        self.df_pred["pred"] = model.predict_proba(self.df_pred.values)[:, 1]
-        self.p_60 = self.df_pred["pred"]
-        self.p_60 = self.possible_60()
-        self.p_60 = self.p_60 / self.p_60.sum()
-        self.df_pred["pred"] = self.p_60
+        self.p_60 = model.predict_proba(self.df_pred.values)[:, 1]
+        self.p_60 = self.possible_60(self.p_60)

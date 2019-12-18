@@ -54,6 +54,10 @@ def game_data_filter(df, day, agent=0):
     if agent > 0:
         role = df["text"][agent - 1].split()[2]
 
+    execute = df[(df["day"] < day) & (
+        df["type"] == 'execute')]["agent"].values
+    dead = df[(df["day"] < day) & (df["type"] == 'dead')]["agent"].values
+
     # filter by role
     if role in ["VILLAGER", "POSSESSED"]:
         df = df[df["type"].isin(["talk", "vote", "execute", "dead"])]
@@ -69,8 +73,15 @@ def game_data_filter(df, day, agent=0):
 
     df = df[(df["day"] < day) | ((df["day"] == day) & (df["type"] == 'talk'))]
 
+    statusMap = {'1': 'ALIVE', '2': 'ALIVE',
+                 '3': 'ALIVE', '4': 'ALIVE', '5': 'ALIVE'}
+    for i in execute:
+        statusMap[str(i)] = 'DEAD'
+    for i in dead:
+        statusMap[str(i)] = 'DEAD'
+
     predictor.initialize(
-        {"agentIdx": agent, "roleMap": {str(agent): role}}, {})
+        {"agentIdx": agent, "roleMap": {str(agent): role}, "statuMap": statusMap}, {})
     predictor.update_features(df.reset_index())
     predictor.update_df()
 
@@ -123,7 +134,7 @@ print(str(filecount)+'files')
 # print("modelData")
 # print(model.coef_)
 # print(x.columns.values)
-
+"""
 fti = model.feature_importances_
 ids = np.argsort(fti)[::-1]
 print("modelData")
@@ -137,3 +148,4 @@ for i in range(len(ids)):
     else:
         continue
     break
+"""
