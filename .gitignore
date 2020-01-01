@@ -16,3 +16,4 @@ dev/agent
 dev/AIWolfPy/csv
 dev/AIWolfPy/data
 *.pkl
+find . -size +100M | sed -e 's/^\.\///' >> .gitignore
