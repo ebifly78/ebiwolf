@@ -72,6 +72,25 @@ class Predictor_5(object):
 
         return
 
+    def reshape_bracket(self, content):
+        text = content
+        j = 1
+        for i in range(len(content)-1):
+            if content[i] != ' ' and content[i+1] == '(':
+                text = text[:j] + ' ' + text[j:]
+                j += 1
+            if content[i] == '(' and content[i+1] == ' ':
+                text = text[:j+1] + text[j+2:]
+                j -= 1
+            if content[i] == ' ' and content[i+1] == ')':
+                text = text[:j] + text[j+1:]
+                j -= 1
+            if content[i] == ')' and content[i+1] != ' ':
+                text = text[:j+1] + ' ' + text[j+1:]
+                j += 1
+            j += 1
+        return text
+
     def split_bracket(self, content, op_subject):
         list1 = []
         kakko = 0
@@ -186,14 +205,7 @@ class Predictor_5(object):
         self.base_info = base_info
 
         self.watshi_xxx = np.ones((60, self.n_role))
-        """
-        if inspect.currentframe().f_back.f_code.co_filename == 'myagent.py':
-            xv = self.case5.get_case60_df(
-            )["agent_"+str(self.base_info['agentIdx'])].values
-        else:
-            xv = self.case5.get_case60_df(
-            )["agent_"+str(self.base_info['agent'])].values
-        """
+
         xv = self.case5.get_case60_df(
         )["agent_"+str(self.base_info['agentIdx'])].values
 
@@ -228,8 +240,8 @@ class Predictor_5(object):
                             gamedf.agent[i] - 1, a, 0] = 1
             # talk
             elif gamedf.type[i] == 'talk':
-                content = gamedf.text[i].split()
-                # print(content)
+                content = gamedf.text[i]
+                content = self.reshape_bracket(content).split()
                 content = self.talk_content(content, gamedf.agent[i])
                 if content.action in self.case5.action:
                     self.commit_action(content)
@@ -269,14 +281,19 @@ class Predictor_5(object):
             myRole = 3
 
         p = p_60 * self.watshi_xxx[:, myRole]
+
         for ind in range(60):
             i = np.where(self.case5.case60[ind, :] == 1)[0][0] + 1
             if self.base_info['statusMap'][str(i)] != 'ALIVE':
-                p[ind, 1] = 0.0
+                p[ind] = 0.0
 
-        return p / p.sum()
+        if p.sum() != 0:
+            return p / p.sum()
+        else:
+            return p
 
     def update_pred(self):
-        model = joblib.load('ebiwolf.pkl')
+        # model = joblib.load('ebiwolf.pkl')
+        model = joblib.load('LR.pkl')
         self.p_60 = model.predict_proba(self.df_pred.values)[:, 1]
         self.p_60 = self.possible_60(self.p_60)

@@ -62,7 +62,8 @@ def game_data_filter(df, day, phase='daily_initialize', agent=0):
         df = df[(df["day"] < day) | (
             (df["day"] == day) & (df["type"] == 'talk'))]
 
-    predictor.initialize({"agent": agent, "roleMap": {str(agent): role}}, {})
+    predictor.initialize(
+        {"agentIdx": agent, "roleMap": {str(agent): role}}, {})
     predictor.update_features(df.reset_index())
     predictor.update_df()
 
@@ -79,7 +80,7 @@ for files in file_list:
     match_num += 1
 
 days = 3
-x_1000 = np.zeros((60*2*days*match_num, 1344))
+x_1000 = np.zeros((60*2*days*match_num, 1056))
 # x_1000 = np.zeros((60*2*days*match_num, 72))
 y_1000 = np.zeros(60*2*days*match_num)
 
@@ -110,7 +111,7 @@ model = sklearn.linear_model.LogisticRegression()
 #model = RandomForestClassifier()
 model.fit(x_1000, y_1000)
 
-#joblib.dump(model, 'ebiwolf.pkl')
+#joblib.dump(model, 'test.pkl')
 
 np.set_printoptions(suppress=True)
 np.set_printoptions(threshold=np.inf)

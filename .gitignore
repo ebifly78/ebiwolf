@@ -12,4 +12,7 @@ read_log
 activate.sh
 logs
 click.workflow
-dev/agent/*
+dev/agent
+dev/AIWolfPy/csv
+dev/AIWolfPy/data
+*.pkl

@@ -34,21 +34,21 @@ class PythonPlayer(object):
         self.not_reported = False
         self.vote_declare = 0
 
-    def get_p60(self, base_info):
-        if base_info['myRole'] == 'VILLAGER':
-            self.myRole = 0
-        elif base_info['myRole'] == 'WEREWOLF':
-            self.myRole = 1
-        elif base_info['myRole'] == 'POSSESSED':
-            self.myRole = 2
-        elif base_info['myRole'] == 'SEER':
-            self.myRole = 3
+    # def get_p60(self, base_info):
+    #     if base_info['myRole'] == 'VILLAGER':
+    #         self.myRole = 0
+    #     elif base_info['myRole'] == 'WEREWOLF':
+    #         self.myRole = 1
+    #     elif base_info['myRole'] == 'POSSESSED':
+    #         self.myRole = 2
+    #     elif base_info['myRole'] == 'SEER':
+    #         self.myRole = 3
 
-        p_60 = self.predicter_5.possible_60(
-            self.myRole, base_info['statusMap'])
-        p_60 = p_60 / p_60.sum()
+    #     p_60 = self.predicter_5.possible_60(
+    #         self.myRole, base_info['statusMap'])
+    #     p_60 = p_60 / p_60.sum()
 
-        return p_60
+    #     return p_60
 
     def role_p(self, p_60):
         p_5 = np.zeros((5, 4), dtype='float32')
@@ -166,12 +166,12 @@ class PythonPlayer(object):
         return idx
 
     def divine(self):
-
+        idx = 0
         if self.base_info['day'] == 0:
             if self.base_info['agentIdx'] != self.game_setting['playerNum']:
-                return self.base_info['agentIdx'] + 1
+                idx = self.base_info['agentIdx']
             else:
-                return 1
+                idx = 0
 
         # highest prob ww in alive and not divined agents provided watashi ningen
         p = -1
