@@ -19,6 +19,11 @@ from sklearn.externals import joblib
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 
+from sklearn.kernel_approximation import Nystroem
+from sklearn.svm import LinearSVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neural_network import MLPClassifier
+
 
 np.set_printoptions(suppress=True)
 np.set_printoptions(threshold=np.inf)
@@ -166,23 +171,25 @@ def estimate(df, day, myrole='VILLAGER'):
 
 
 def model_init(x, y, param, val):
+    # RandomForestClassifier
     # h_para = [n_estimators, max_depth, min_samples_split, max_features]
-    # n_estimators = 10, max_depth = None, min_samples_split = 2, max_features = 'auto' # renew
-    # n_estimators = 46, max_depth = 46, min_samples_split = 21, max_features = 100     # renew
-
-    h_para = [10, None, 2, 'auto']
-    if param > 0:
-        h_para[param-1] = val
-
+    # h_para = [10, None, 2, 'auto'] # default
+    # h_para = [46, 46, 21, 100] # renew
+    # if param > 0:
+    #     h_para[param-1] = val
     # model = RandomForestClassifier(
     #     n_estimators=h_para[0], max_depth=h_para[1],
     #     min_samples_split=h_para[2], max_features=h_para[3],
     #     n_jobs=-1)
-    model = LogisticRegression(
-        solver='liblinear', multi_class='auto', n_jobs=-1)
+
+    # model = RandomForestClassifier()
+    # model = LogisticRegression()
+    # model = LinearSVC()
+    # model = DecisionTreeClassifier()
+    model = MLPClassifier()
 
     model.fit(x, y)
-    joblib.dump(model, 'LR.pkl')
+    joblib.dump(model, 'MLP.pkl')
 
 
 def data_active(file_list, expan):
@@ -193,7 +200,8 @@ def data_active(file_list, expan):
         for i in range(expan):
             df = gamedf_expansion(gamedf)
             for d in range(1, days):
-                x[(ind*60):((ind+1)*60), :], y[(ind*60):((ind+1)*60)] = get_data(df, d)
+                x[(ind*60):((ind+1)*60), :], y[(ind*60)
+                   :((ind+1)*60)] = get_data(df, d)
                 ind += 1
                 n_data = int(ind / (days-1))
             if n_data % 100 == 0:
@@ -281,7 +289,7 @@ for limit in limit_list:
 
                 for d in range(1, days):
                     out = open(
-                        'csv/LR_expan{}_param{}_val{}_day{}.csv'.format(expan, param, val, d), 'a')
+                        'csv/MLP_expan{}_param{}_val{}_day{}.csv'.format(expan, param, val, d), 'a')
                     outer = csv.writer(out)
 
                     recall_train = est_train[d, 0] / est_train[d, 1]

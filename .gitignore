@@ -14,8 +14,10 @@ logs
 click.workflow
 dev/agent
 dev/AIWolfPy/csv
+dev/AIWolfPy/csv_old
 dev/AIWolfPy/data
 *.pkl
 find . -size +100M | sed -e 's/^\.\///' >> .gitignore
 .DS_Store
+dev/.DS_Store
 dev/.DS_Store

@@ -294,6 +294,10 @@ class Predictor_5(object):
 
     def update_pred(self):
         # model = joblib.load('ebiwolf.pkl')
-        model = joblib.load('LR.pkl')
-        self.p_60 = model.predict_proba(self.df_pred.values)[:, 1]
+        model = joblib.load('MLP.pkl')
+        if hasattr(model, 'predict_proba'):
+            self.p_60 = model.predict_proba(self.df_pred.values)[:, 1]
+        else:
+            self.p_60 = model.decision_function(self.df_pred.values)
+            self.p_60 = 1 / (1+pow(math.e, -self.p_60))
         self.p_60 = self.possible_60(self.p_60)
