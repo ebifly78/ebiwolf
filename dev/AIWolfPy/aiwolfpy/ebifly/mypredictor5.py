@@ -216,10 +216,10 @@ class Predictor_5(object):
         self.x_para = np.zeros(
             (5, 5, self.n_action, self.n_object), dtype='float32')
 
-    def update(self, gamedf):
+    def update(self, gamedf, model_name='test'):
         self.update_features(gamedf)
         self.update_df()
-        self.update_pred()
+        self.update_pred(pkl=model_name)
 
     def update_features(self, gamedf):
         # read log
@@ -292,9 +292,8 @@ class Predictor_5(object):
         else:
             return p
 
-    def update_pred(self):
-        # model = joblib.load('ebiwolf.pkl')
-        model = joblib.load('MLP.pkl')
+    def update_pred(self, pkl='test'):
+        model = joblib.load(pkl + '.pkl')
         if hasattr(model, 'predict_proba'):
             self.p_60 = model.predict_proba(self.df_pred.values)[:, 1]
         else:

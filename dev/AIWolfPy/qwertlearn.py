@@ -201,102 +201,103 @@ np.random.shuffle(file_list)
 
 print("get_files = {}[sec]".format(time.time() - start))
 
-# for j in range(0, 6):
-#     for k in range(1, 10):
-#         if (k*10**j) > len(file_list):
-#             sys.exit()
+for j in range(0, 6):
+    for k in range(1, 10):
+        if (k*10**j) > 10000:
+            print(param + "_all_work = {}[sec]".format(time.time() - start))
+            sys.exit()
 
-file_limit = 4000
+        file_limit = k*10**j * 2
 
-filing = file_list[:file_limit]
-file_num = len(filing)
+        filing = file_list[:file_limit]
+        file_num = len(filing)
 
-split_id = int(file_num * 0.5)
-train_file = filing[:split_id]
-test_file = filing[split_id:]
+        split_id = int(file_num * 0.5)
+        train_file = filing[:split_id]
+        test_file = filing[split_id:]
 
-train_num = len(train_file)
-test_num = len(test_file)
+        train_num = len(train_file)
+        test_num = len(test_file)
 
-days = 3
-expan = 1
-x_data = np.zeros((60*days*train_num*expan, predictor.n_para))
-y_data = np.zeros(60*days*train_num*expan)
+        days = 3
+        expan = 1
+        x_data = np.zeros((60*days*train_num*expan, predictor.n_para))
+        y_data = np.zeros(60*days*train_num*expan)
 
-start1 = time.time()
+        start1 = time.time()
 
-ind = 0
-for files in train_file:
-    for i in range(expan):
-        a = random.randint(0, 119)
-        for d in range(days):
-            x, y = game_data_filter(
-                aiwolfpy.read_log(files), day=d, pat=a)
-            x_data[(ind*60):((ind+1)*60), :] = x
-            y_data[(ind*60):((ind+1)*60)] = y
-            ind += 1
-        if (ind/days) % 100 == 0:
-            print('get_{}data = {}[sec]'.format(
-                int(ind/days), time.time() - start1))
+        ind = 0
+        for files in train_file:
+            for i in range(expan):
+                a = random.randint(0, 119)
+                for d in range(days):
+                    x, y = game_data_filter(
+                        aiwolfpy.read_log(files), day=d, pat=a)
+                    x_data[(ind*60):((ind+1)*60), :] = x
+                    y_data[(ind*60):((ind+1)*60)] = y
+                    ind += 1
+                if (ind/days) % 100 == 0:
+                    print('get_{}data = {}[sec]'.format(
+                        int(ind/days), time.time() - start1))
 
-print("get_train_data = {}[sec]".format(time.time() - start1))
+        print("get_train_data = {}[sec]".format(time.time() - start1))
 
-times = 1
-for i in range(times):
-    start1 = time.time()
-    a = int(10 ** (i/3))
-    param = 'SVC'
-    # print(param + " = {}".format(a))
-    # n_estimators = 30, max_depth = 10, min_samples_split = 2, max_features = 30   # default
-    # n_estimators = 46, max_depth = 46, min_samples_split = 21, max_features = 100 # renew
-    # model = RandomForestClassifier(
-    #     n_estimators=30, max_depth=10, min_samples_split=2, max_features=30, n_jobs=-1, random_state=0)
-    # model = RandomForestClassifier()
-    # model = LogisticRegression()
-    model = LinearSVC()
-    # model = DecisionTreeClassifier()
-    # model = MLPClassifier()
+        times = 1
+        for i in range(times):
+            start1 = time.time()
+            a = int(10 ** (i/3))
+            param = 'RFCd'
+            # print(param + " = {}".format(a))
+            # n_estimators = 30, max_depth = 10, min_samples_split = 2, max_features = 30   # default
+            # n_estimators = 46, max_depth = 46, min_samples_split = 21, max_features = 100 # renew
+            # model = RandomForestClassifier(
+            #     n_estimators=46, max_depth=46, min_samples_split=21, max_features=100, n_jobs=-1, random_state=0)
+            model = RandomForestClassifier()
+            # model = LogisticRegression()
+            # model = LinearSVC()
+            # model = DecisionTreeClassifier()
+            # model = MLPClassifier()
 
-    model.fit(x_data, y_data)
-    joblib.dump(model, 'test.pkl')
-    print('fit_model = {}[sec]'.format(time.time() - start1))
+            model.fit(x_data, y_data)
+            joblib.dump(model, 'test.pkl')
+            print('fit_model = {}[sec]'.format(time.time() - start1))
 
-    start1 = time.time()
+            start1 = time.time()
 
-    train = np.zeros((days, 2))
-    test = np.zeros((days, 2))
+            train = np.zeros((days, 2))
+            test = np.zeros((days, 2))
 
-    ind = 0
-    for files in train_file:
-        for d in range(1, days):
-            y = estimate(aiwolfpy.read_log(files), day=d)
-            if y >= 0:
-                train[d, 0] += y
-                train[d, 1] += 1
-        if train[1, 1] % 100 == 0:
-            print('est_train_{}files = {}[sec]'.format(
-                int(train[1, 1]), time.time() - start1))
+            ind = 0
+            for files in train_file:
+                for d in range(1, days):
+                    y = estimate(aiwolfpy.read_log(files), day=d)
+                    if y >= 0:
+                        train[d, 0] += y
+                        train[d, 1] += 1
+                if train[1, 1] % 100 == 0:
+                    print('est_train_{}files = {}[sec]'.format(
+                        int(train[1, 1]), time.time() - start1))
 
-    ind = 0
-    for files in test_file:
-        for d in range(1, days):
-            y = estimate(aiwolfpy.read_log(files), day=d)
-            if y >= 0:
-                test[d, 0] += y
-                test[d, 1] += 1
-        if test[1, 1] % 100 == 0:
-            print('est_test_{}files = {}[sec]'.format(
-                int(test[1, 1]), time.time() - start1))
+            ind = 0
+            for files in test_file:
+                for d in range(1, days):
+                    y = estimate(aiwolfpy.read_log(files), day=d)
+                    if y >= 0:
+                        test[d, 0] += y
+                        test[d, 1] += 1
+                if test[1, 1] % 100 == 0:
+                    print('est_test_{}files = {}[sec]'.format(
+                        int(test[1, 1]), time.time() - start1))
 
-    start2 = time.time()
-    for d in range(1, days):
-        out = open('csv/' + param + '_day{}.csv'.format(d), 'a')
-        outer = csv.writer(out)
-        outer.writerow(
-            [train_num, train[d, 0]/train[d, 1], test[d, 0] / test[d, 1]])
-    print("write_csv = {}[sec]".format(time.time() - start2))
+            start2 = time.time()
+            for d in range(1, days):
+                out = open('csv/' + param + '_day{}.csv'.format(d), 'a')
+                outer = csv.writer(out)
+                outer.writerow(
+                    [train_num, train[d, 0]/train[d, 1], test[d, 0] / test[d, 1]])
+            print("write_csv = {}[sec]".format(time.time() - start2))
 
-    print("single_estimate = {}[sec]".format(
-        time.time() - start1))
+            print("single_estimate = {}[sec]".format(
+                time.time() - start1))
 
-print("all_work = {}[sec]".format(time.time() - start))
+print(param + "_all_work = {}[sec]".format(time.time() - start))
