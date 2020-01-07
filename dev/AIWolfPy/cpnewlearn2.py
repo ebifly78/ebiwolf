@@ -257,22 +257,24 @@ np.random.shuffle(file_list)
 print("get_files = {:.2f}[sec]".format(time.time() - start1))
 
 
-model_list = ['RFCr']
+model_list = ['RFC']
 
 limit_list = []
 # for i in range(2, 6):
 #     for j in range(1, 10):
 #         if j * 10**i <= 5000:
 #             limit_list.append(j * 10**i)
-limit_list.append(2000)
+for i in range(1):
+    limit_list.append(2000)
 
 expan_list = []
-expan_list.append(1)
+for i in range(1, 21):
+    expan_list.append(i)
+# expan_list.append(1)
 
 # param_RFC : 0=Random, 1=n_estimators, 2=max_depth, 3=min_samples_split, 4=max_features
 param_list = []
-for i in range(50):
-    param_list.append(0)
+param_list.append(0)
 
 val_list = []
 # for i in range(0, 6):
@@ -284,12 +286,12 @@ for model_name in model_list:
     start4 = time.time()
     for limit in limit_list:
         if limit == 0:
-                limit = len(file_list)
-            elif limit >= len(file_list)/2:
-                print('file_limit_error = {}'.format(limit))
-                break
-            else:
-                limit = limit * 2
+            limit = len(file_list)
+        elif limit >= len(file_list)/2:
+            print('file_limit_error = {}'.format(limit))
+            break
+        else:
+            limit = limit * 2
 
         for expan in expan_list:
             start1 = time.time()
@@ -325,15 +327,13 @@ for model_name in model_list:
                         # out = open(
                         #     'csv/' + model_name + '_expan{}_param{}_val{}_day{}.csv'.format(expan, param, val, d), 'a')
                         out = open(
-                            'csv/' + model_name + '_expan{}_param{}_day{}.csv'.format(expan, param, d), 'a')
+                            'csv/' + model_name + '_param{}_val{}_day{}.csv'.format(param, val, d), 'a')
                         outer = csv.writer(out)
 
                         recall_train = est_train[d, 0] / est_train[d, 1]
                         recall_test = est_test[d, 0] / est_test[d, 1]
 
-                        # outer.writerow([len(train), recall_train, recall_test])
-                        outer.writerow(
-                            h_para + [recall_train, recall_test])  # param0
+                        outer.writerow([expan, recall_train, recall_test])
                         out.close()
                     print("write_csv = {:.2f}[sec]".format(
                         time.time() - start1))
@@ -341,7 +341,7 @@ for model_name in model_list:
                     print("single_estimate_{}files = {:.2f}[sec]\n".format(
                         len(train), time.time() - start3))
                     log_list.append("{}_all_estimate = {:.2f}[sec]".format(
-                        h_para, time.time() - start3))
+                        expan, time.time() - start3))
 
     print(model_name +
           "_all_estimate = {:.2f}[sec]\n".format(time.time() - start4))
