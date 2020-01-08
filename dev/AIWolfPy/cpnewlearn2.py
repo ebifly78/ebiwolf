@@ -268,7 +268,7 @@ for i in range(1):
     limit_list.append(2000)
 
 expan_list = []
-for i in range(1, 21):
+for i in range(18, 21):
     expan_list.append(i)
 # expan_list.append(1)
 

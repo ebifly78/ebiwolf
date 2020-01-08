@@ -20,4 +20,4 @@ dev/AIWolfPy/data
 find . -size +100M | sed -e 's/^\.\///' >> .gitignore
 .DS_Store
 dev/.DS_Store
-dev/.DS_Store
+dev/AIWolfPy/aiwolfpy/submit

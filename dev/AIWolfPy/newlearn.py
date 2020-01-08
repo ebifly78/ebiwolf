@@ -271,7 +271,7 @@ expan_list.append(1)
 
 # param_RFC : 0=Random, 1=n_estimators, 2=max_depth, 3=min_samples_split, 4=max_features
 param_list = []
-for i in range(50):
+for i in range(1000):
     param_list.append(0)
 
 val_list = []
@@ -284,12 +284,12 @@ for model_name in model_list:
     start4 = time.time()
     for limit in limit_list:
         if limit == 0:
-                limit = len(file_list)
-            elif limit >= len(file_list)/2:
-                print('file_limit_error = {}'.format(limit))
-                break
-            else:
-                limit = limit * 2
+            limit = len(file_list)
+        elif limit >= len(file_list)/2:
+            print('file_limit_error = {}'.format(limit))
+            break
+        else:
+            limit = limit * 2
 
         for expan in expan_list:
             start1 = time.time()
