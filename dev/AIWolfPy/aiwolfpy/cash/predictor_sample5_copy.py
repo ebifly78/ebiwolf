@@ -184,7 +184,7 @@ class Predictor_5(object):
         #     self.df_pred.values, l_para.reshape(-1, 1))
         # self.df_pred["pred"] = np.exp(-np.log(10)*self.df_pred["pred"])
 
-        model = joblib.load('test.pkl')
+        model = joblib.load('cash.pkl')
         self.df_pred["pred"] = model.predict_proba(self.df_pred.values)[:, 1]
 
         # average

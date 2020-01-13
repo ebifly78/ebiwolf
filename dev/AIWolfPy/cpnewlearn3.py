@@ -259,10 +259,10 @@ np.random.shuffle(file_list)
 print("get_files = {:.2f}[sec]".format(time.time() - start1))
 
 
-model_list = ['RFC']
+model_list = ['RFCr']
 
 limit_list = []
-for i in range(42, 51):  # RFC de 42 kara yaru
+for i in range(20, 51):
     limit_list.append(int(10**(i/10)))
 # limit_list.append(2000)
 

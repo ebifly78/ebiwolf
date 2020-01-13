@@ -27,9 +27,6 @@ from sklearn.model_selection import RandomizedSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 
-resource.setrlimit(resource.RLIMIT_DATA, (10 * 1024**3, -1))
-
-
 np.set_printoptions(suppress=True)
 np.set_printoptions(threshold=np.inf)
 pd.set_option('display.max_columns', None)
@@ -173,104 +170,108 @@ np.random.shuffle(file_list)
 
 print("get_files = {}[sec]".format(time.time() - start))
 
-for j in range(0, 6):
-    for k in range(1, 10):
-        if (k*10**j) > len(file_list):
-            sys.exit()
+limit_list = []
+for i in range(20, 41):
+    limit_list.append(int(10**(i/10)))
 
-        file_limit = (k*10**j)*2
+for limit in limit_list:
+    if limit == 0:
+        limit = len(file_list)
+    elif limit >= len(file_list)/2:
+        print('file_limit_error = {}'.format(limit))
+        break
+    else:
+        limit = limit * 2
 
-        filing = file_list[:file_limit]
-        file_num = len(filing)
+    file_limit = limit
 
-        split_id = int(file_num * 0.5)
-        train_file = filing[:split_id]
-        test_file = filing[split_id:]
+    filing = file_list[:file_limit]
+    file_num = len(filing)
 
-        train_num = len(train_file)
-        test_num = len(test_file)
+    split_id = int(file_num * 0.5)
+    train_file = filing[:split_id]
+    test_file = filing[split_id:]
 
-        days = 3
-        expan = 1
-        x_data = np.zeros((60*days*train_num*expan*2, 80))
-        y_data = np.zeros(60*days*train_num*expan*2)
+    train_num = len(train_file)
+    test_num = len(test_file)
 
-        start1 = time.time()
+    days = 3
+    expan = 1
+    x_data = np.zeros((60*days*train_num*expan*2, 80))
+    y_data = np.zeros(60*days*train_num*expan*2)
 
-        ind = 0
-        for files in train_file:
-            for i in range(expan):
-                a = random.randint(0, 119)
-                for d in range(days):
-                    x, y = game_data_filter(aiwolfpy.read_log(
-                        files), day=d, phase='vote')
-                    x_data[(ind*60):((ind+1)*60), :] = x
-                    y_data[(ind*60):((ind+1)*60)] = y
-                    ind += 1
-                    x, y = game_data_filter(aiwolfpy.read_log(
-                        files), day=d+1, phase='daily_initialize')
-                    x_data[(ind*60):((ind+1)*60), :] = x
-                    y_data[(ind*60):((ind+1)*60)] = y
-                    ind += 1
-                if (ind/days/2) % 100 == 0:
-                    print('get_{}data = {}[sec]'.format(
-                        int(ind/days/2), time.time() - start1))
+    start1 = time.time()
 
-        print("get_train_data = {}[sec]".format(time.time() - start1))
+    ind = 0
+    for files in train_file:
+        for i in range(expan):
+            a = random.randint(0, 119)
+            for d in range(days):
+                x, y = game_data_filter(aiwolfpy.read_log(
+                    files), day=d, phase='vote')
+                x_data[(ind*60):((ind+1)*60), :] = x
+                y_data[(ind*60):((ind+1)*60)] = y
+                ind += 1
+                x, y = game_data_filter(aiwolfpy.read_log(
+                    files), day=d+1, phase='daily_initialize')
+                x_data[(ind*60):((ind+1)*60), :] = x
+                y_data[(ind*60):((ind+1)*60)] = y
+                ind += 1
+            if (ind/days/2) % 100 == 0:
+                print('get_{}data = {}[sec]'.format(
+                    int(ind/days/2), time.time() - start1))
 
-        times = 10
-        # for i in range(times):
-        start1 = time.time()
-        i = 1
-        a = int(10 ** (i/3))
-        param = 'cash'
-        # print(param + " = {}".format(a))
-        # n_estimators = 30, max_depth = 10, min_samples_split = 2, max_features = 30   # default
-        # n_estimators = 46, max_depth = 46, min_samples_split = 21, max_features = 100 # renew
-        # model = RandomForestClassifier(
-        #     n_estimators=30, max_depth=10, min_samples_split=2, max_features=30, n_jobs=-1, random_state=0)
-        model = LogisticRegression()
+    print("get_train_data = {}[sec]".format(time.time() - start1))
 
-        model.fit(x_data, y_data)
-        joblib.dump(model, 'test.pkl')
-        print('fit_model = {}[sec]'.format(time.time() - start1))
+    times = 10
+    # for i in range(times):
+    start1 = time.time()
+    i = 1
+    a = int(10 ** (i/3))
+    param = 'cash'
+    # print(param + " = {}".format(a))
+    model = RandomForestClassifier(n_jobs=1, random_state=0)
 
-        start1 = time.time()
+    model.fit(x_data, y_data)
+    joblib.dump(model, 'cash.pkl')
+    print('fit_model = {}[sec]'.format(time.time() - start1))
 
-        train = np.zeros((days, 2))
-        test = np.zeros((days, 2))
+    start1 = time.time()
 
-        ind = 0
-        for files in train_file:
-            for d in range(1, days):
-                y = estimate(aiwolfpy.read_log(files), day=d)
-                if y >= 0:
-                    train[d, 0] += y
-                    train[d, 1] += 1
-            if train[1, 1] % 100 == 0:
-                print('est_train_{}files = {}[sec]'.format(
-                    int(train[1, 1]), time.time() - start1))
+    train = np.zeros((days, 2))
+    test = np.zeros((days, 2))
 
-        ind = 0
-        for files in test_file:
-            for d in range(1, days):
-                y = estimate(aiwolfpy.read_log(files), day=d)
-                if y >= 0:
-                    test[d, 0] += y
-                    test[d, 1] += 1
-            if test[1, 1] % 100 == 0:
-                print('est_test_{}files = {}[sec]'.format(
-                    int(test[1, 1]), time.time() - start1))
-
-        start2 = time.time()
+    ind = 0
+    for files in train_file:
         for d in range(1, days):
-            out = open('csv/' + param + '_renew_day{}.csv'.format(d), 'a')
-            outer = csv.writer(out)
-            outer.writerow(
-                [train_num, train[d, 0]/train[d, 1], test[d, 0] / test[d, 1]])
-        print("write_csv = {}[sec]".format(time.time() - start2))
+            y = estimate(aiwolfpy.read_log(files), day=d)
+            if y >= 0:
+                train[d, 0] += y
+                train[d, 1] += 1
+        if train[1, 1] % 100 == 0:
+            print('est_train_{}files = {}[sec]'.format(
+                int(train[1, 1]), time.time() - start1))
 
-        print("single_estimate = {}[sec]".format(
-            time.time() - start1))
+    ind = 0
+    for files in test_file:
+        for d in range(1, days):
+            y = estimate(aiwolfpy.read_log(files), day=d)
+            if y >= 0:
+                test[d, 0] += y
+                test[d, 1] += 1
+        if test[1, 1] % 100 == 0:
+            print('est_test_{}files = {}[sec]'.format(
+                int(test[1, 1]), time.time() - start1))
+
+    start2 = time.time()
+    for d in range(1, days):
+        out = open('csv/' + param + '_RFC_day{}.csv'.format(d), 'a')
+        outer = csv.writer(out)
+        outer.writerow(
+            [train_num, train[d, 0]/train[d, 1], test[d, 0] / test[d, 1]])
+    print("write_csv = {}[sec]".format(time.time() - start2))
+
+    print("single_estimate = {}[sec]".format(
+        time.time() - start1))
 
 print("all_work = {}[sec]".format(time.time() - start))

@@ -175,16 +175,21 @@ def model_init(x, y, param, val, name):
     # h_para = [n_estimators, max_depth, min_samples_split, max_features]
     h_para = [10, None, 2, 'auto']  # default
     # h_para = [46, 46, 21, 100]  # renew
+    # h_para = [600, 300, 25, 600]  # renew
+    crit = 'gini'
     if param > 0:
         h_para[param-1] = val
+        crit = 'gini'
     elif param == 0:
-        h_para = [int(10**random.uniform(0.4, 3)) for i in range(4)]
+        h_para = [int(10**random.uniform(1.0, 2.5)) for i in range(4)]
+        crit = random.choice(['entropy'])
 
-    if name == 'RFCr':
+    if name == 'RFCr3':
+        print(h_para)
         model = RandomForestClassifier(
             n_estimators=h_para[0], max_depth=h_para[1],
             min_samples_split=h_para[2], max_features=h_para[3],
-            n_jobs=1, random_state=0)
+            criterion=crit, n_jobs=1, random_state=0)
     elif name == 'RFC':
         model = RandomForestClassifier(n_jobs=1, random_state=0)
     elif name == 'LR':
@@ -201,7 +206,12 @@ def model_init(x, y, param, val, name):
     model.fit(x, y)
     joblib.dump(model, name + '.pkl')
 
-    return h_para
+    if crit == 'gini':
+        crit = 0
+    else:
+        crit = 1
+
+    return h_para, crit
 
 
 def data_active(file_list, expan):
@@ -257,24 +267,22 @@ np.random.shuffle(file_list)
 print("get_files = {:.2f}[sec]".format(time.time() - start1))
 
 
-model_list = ['RFC']
+model_list = ['RFCr3']
 
 limit_list = []
 # for i in range(2, 6):
 #     for j in range(1, 10):
 #         if j * 10**i <= 5000:
 #             limit_list.append(j * 10**i)
-for i in range(1):
-    limit_list.append(2000)
+limit_list.append(2000)
 
 expan_list = []
-for i in range(18, 21):
-    expan_list.append(i)
-# expan_list.append(1)
+expan_list.append(1)
 
 # param_RFC : 0=Random, 1=n_estimators, 2=max_depth, 3=min_samples_split, 4=max_features
 param_list = []
-param_list.append(0)
+for i in range(100):
+    param_list.append(0)
 
 val_list = []
 # for i in range(0, 6):
@@ -307,7 +315,7 @@ for model_name in model_list:
                     start3 = time.time()
 
                     print(time.gmtime())
-                    h_para = model_init(x, y, param, val, model_name)
+                    h_para, crit = model_init(x, y, param, val, model_name)
 
                     print('fit_model = {:.2f}[sec]'.format(
                         time.time() - start1))
@@ -327,13 +335,15 @@ for model_name in model_list:
                         # out = open(
                         #     'csv/' + model_name + '_expan{}_param{}_val{}_day{}.csv'.format(expan, param, val, d), 'a')
                         out = open(
-                            'csv/' + model_name + '_param{}_val{}_day{}.csv'.format(param, val, d), 'a')
+                            'csv/RFCtest_expan{}_param{}_day{}.csv'.format(expan, param, d), 'a')
                         outer = csv.writer(out)
 
                         recall_train = est_train[d, 0] / est_train[d, 1]
                         recall_test = est_test[d, 0] / est_test[d, 1]
 
-                        outer.writerow([expan, recall_train, recall_test])
+                        # outer.writerow([len(train), recall_train, recall_test])
+                        outer.writerow(
+                            h_para + [crit, recall_train, recall_test])  # param0
                         out.close()
                     print("write_csv = {:.2f}[sec]".format(
                         time.time() - start1))
@@ -341,7 +351,7 @@ for model_name in model_list:
                     print("single_estimate_{}files = {:.2f}[sec]\n".format(
                         len(train), time.time() - start3))
                     log_list.append("{}_all_estimate = {:.2f}[sec]".format(
-                        expan, time.time() - start3))
+                        h_para, time.time() - start3))
 
     print(model_name +
           "_all_estimate = {:.2f}[sec]\n".format(time.time() - start4))
