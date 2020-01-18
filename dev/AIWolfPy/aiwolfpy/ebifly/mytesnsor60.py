@@ -1,6 +1,7 @@
 from __future__ import print_function, division
 import numpy as np
 import pandas as pd
+import sys
 
 
 class Tensor60(object):
@@ -46,6 +47,12 @@ class Tensor60(object):
         return np.tensordot(self.tensor60_3d, x_para, axes=[[3, 4], [0, 1]])
 
     def apply_tensor_df(self, x_para, names):
+        print(self.tensor60_3d.shape)
+        print(x_para.shape)
+        print(np.tensordot(self.tensor60_3d,
+                           x_para, axes=[[3, 4], [0, 1]]).shape)
+        print(self.apply_tensor_3d(x_para).reshape((60, -1)).shape)
+        sys.exit()
         collected_df = pd.DataFrame(
             self.apply_tensor_3d(x_para).reshape((60, -1)))
         collected_df.columns = names
